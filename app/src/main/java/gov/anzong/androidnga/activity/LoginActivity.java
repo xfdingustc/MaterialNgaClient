@@ -1,21 +1,17 @@
 package gov.anzong.androidnga.activity;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.pm.ActivityInfo;
-import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.WindowManager;
@@ -26,6 +22,9 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 
+import com.orhanobut.logger.Logger;
+
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URLDecoder;
@@ -33,33 +32,32 @@ import java.net.URLEncoder;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import butterknife.BindView;
 import cn.whaley.materialngaclient.app.MyApp;
+import cn.whaley.materialngaclient.rest.NgaService;
 import cn.whaley.materialngaclient.ui.activities.MainActivity;
 import gov.anzong.androidnga.R;
+import okhttp3.ResponseBody;
+import rx.Subscriber;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Func1;
+import rx.schedulers.Schedulers;
 import sp.phone.adapter.UserListAdapter;
 import sp.phone.bean.PerferenceConstant;
 import sp.phone.forumoperation.HttpPostClient;
 import sp.phone.interfaces.OnAuthcodeLoadFinishedListener;
 import sp.phone.task.AccountAuthcodeImageReloadTask;
-import sp.phone.utils.ActivityUtil;
 import sp.phone.utils.PhoneConfiguration;
 import sp.phone.utils.ReflectionUtil;
 import sp.phone.utils.StringUtil;
 import sp.phone.utils.ThemeManager;
 
-public class LoginActivity extends SwipeBackAppCompatActivity implements
-        PerferenceConstant, OnAuthcodeLoadFinishedListener {
+public class LoginActivity extends SwipeBackAppCompatActivity implements PerferenceConstant, OnAuthcodeLoadFinishedListener {
+    private static final String TAG = LoginActivity.class.getSimpleName();
 
-    EditText userText;
-    EditText passwordText;
-    EditText authcodeText;
-    ImageView authcodeImg;
-    View view;
-    ListView userList;
     Object commit_lock = new Object();
     String name;
-    Button button_login;
-    ImageButton authcodeimg_refresh;
+
     AccountAuthcodeImageReloadTask loadauthcodetask;
     private String action, messagemode;
     private String tid;
@@ -73,17 +71,38 @@ public class LoginActivity extends SwipeBackAppCompatActivity implements
     private String authcode_cookie;
     private boolean loading = false;
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see android.app.Activity#onCreate(android.os.Bundle)
-     */
+    public static void launch(Activity activity) {
+        Intent intent = new Intent(activity, LoginActivity.class);
+        activity.startActivity(intent);
+        activity.overridePendingTransition(R.anim.zoom_enter, R.anim.zoom_exit);
+    }
+
+    @BindView(R.id.login_button)
+    Button buttonLogin;
+
+    @BindView(R.id.authcode_img)
+    ImageView authcodeImg;
+
+    @BindView(R.id.authcode_refresh)
+    ImageButton authcodeimgRefresh;
+
+    @BindView(R.id.login_user_edittext)
+    EditText userText;
+
+    @BindView(R.id.login_password_edittext)
+    EditText passwordText;
+
+    @BindView(R.id.login_authcode_edittext)
+    EditText authcodeText;
+
+    @BindView(R.id.user_list)
+    ListView userList;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         // TODO Auto-generated method stub
         // requestWindowFeature(Window.FEATURE_NO_TITLE);
-        getWindow().setSoftInputMode(
-                WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
         super.onCreate(savedInstanceState);
         int orentation = ThemeManager.getInstance().screenOrentation;
         if (orentation == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
@@ -94,16 +113,10 @@ public class LoginActivity extends SwipeBackAppCompatActivity implements
         }
         ThemeManager.SetContextTheme(this);
 
-        view = LayoutInflater.from(this).inflate(R.layout.login, null);
-        this.setContentView(view);
-        this.setTitle("登录");
-        button_login = (Button) findViewById(R.id.login_button);
-        authcodeImg = (ImageView) view.findViewById(R.id.authcode_img);
-        authcodeimg_refresh = (ImageButton) findViewById(R.id.authcode_refresh);
-        userText = (EditText) findViewById(R.id.login_user_edittext);
-        passwordText = (EditText) findViewById(R.id.login_password_edittext);
-        authcodeText = (EditText) findViewById(R.id.login_authcode_edittext);
-        userList = (ListView) findViewById(R.id.user_list);
+
+        initViews();
+
+
         userList.setAdapter(new UserListAdapter(this, userText));
 
 
@@ -116,7 +129,7 @@ public class LoginActivity extends SwipeBackAppCompatActivity implements
         }
 
         LoginButtonListener listener = new LoginButtonListener(postUrl);
-        button_login.setOnClickListener(listener);
+        buttonLogin.setOnClickListener(listener);
         updateThemeUI();
         Timer timer = new Timer();
         timer.schedule(new TimerTask() {
@@ -157,7 +170,7 @@ public class LoginActivity extends SwipeBackAppCompatActivity implements
                 }
             }
         }
-        authcodeimg_refresh.setOnClickListener(new OnClickListener() {
+        authcodeimgRefresh.setOnClickListener(new OnClickListener() {
 
             @Override
             public void onClick(View v) {
@@ -178,6 +191,11 @@ public class LoginActivity extends SwipeBackAppCompatActivity implements
         reloadauthcode();
     }
 
+    private void initViews() {
+        setContentView(R.layout.login);
+        toolbar.setTitle(R.string.login);
+    }
+
     private void reloadauthcode() {
         authcode_cookie = "";
         authcodeText.setText("");
@@ -185,8 +203,34 @@ public class LoginActivity extends SwipeBackAppCompatActivity implements
             loadauthcodetask.cancel(true);
         }
         authcodeImg.setImageDrawable(getResources().getDrawable(R.drawable.q_vcode));
-        loadauthcodetask = new AccountAuthcodeImageReloadTask(this, this);
-        loadauthcodetask.execute();
+//        loadauthcodetask = new AccountAuthcodeImageReloadTask(this, this);
+//        loadauthcodetask.execute();
+        NgaService.createNgaApiService().getRegCode("gen_reg")
+                .map(new Func1<ResponseBody, Bitmap>() {
+                    @Override
+                    public Bitmap call(ResponseBody responseBody) {
+                        return BitmapFactory.decodeStream(responseBody.byteStream());
+                    }
+                })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Subscriber<Bitmap>() {
+                    @Override
+                    public void onCompleted() {
+                        Logger.t(TAG).d("onComplete");
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Logger.t(TAG).d("on error " + e.toString());
+                    }
+
+                    @Override
+                    public void onNext(Bitmap bitmap) {
+                        authcodeImg.setImageBitmap(bitmap);
+                    }
+                });
+
     }
 
     private void reloadauthcode(String error) {
@@ -197,69 +241,15 @@ public class LoginActivity extends SwipeBackAppCompatActivity implements
     }
 
     private void updateThemeUI() {
-        ThemeManager tm = ThemeManager.getInstance();
-        if (tm.getMode() == ThemeManager.MODE_NIGHT) {
-            view.setBackgroundResource(ThemeManager.getInstance()
-                    .getBackgroundColor());
-        } else {
-            setbackgroundbitmap();
-        }
+//        ThemeManager tm = ThemeManager.getInstance();
+//        if (tm.getMode() == ThemeManager.MODE_NIGHT) {
+//            view.setBackgroundResource(ThemeManager.getInstance()
+//                    .getBackgroundColor());
+//        } else {
+//            setbackgroundbitmap();
+//        }
     }
 
-    @SuppressWarnings("deprecation")
-    private void setbackgroundbitmap() {
-        if (this.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) { // 竖屏
-            BitmapFactory.Options bfoOptions = new BitmapFactory.Options();
-            bfoOptions.inScaled = false;
-            Bitmap bmp = BitmapFactory.decodeResource(getResources(),
-                    R.drawable.login_background_shu, bfoOptions);
-            DisplayMetrics dm = new DisplayMetrics();
-            getWindowManager().getDefaultDisplay().getMetrics(dm);
-            int width = dm.widthPixels;
-            int heigth = dm.heightPixels;
-            double phoneheigthtoheigth = (double) heigth / width;
-            int bitmapwidth = 640;
-            int bitmapheigth = 1136;
-            double bitmapheigthtoheigth = (double) bitmapheigth / bitmapwidth;
-            ;
-            if (phoneheigthtoheigth > bitmapheigthtoheigth) {
-                int backbitmapwidth = (int) (1136 / phoneheigthtoheigth);
-                int cutwidth = (int) (640 - backbitmapwidth) / 2;
-                bmp = Bitmap.createBitmap(bmp, cutwidth, 0, backbitmapwidth,
-                        bitmapheigth);
-            } else if (phoneheigthtoheigth < bitmapheigthtoheigth) {
-                int cutheigth = (int) (bitmapwidth * phoneheigthtoheigth);
-                bmp = Bitmap.createBitmap(bmp, 0, 0, bitmapwidth, cutheigth);
-            }
-            BitmapDrawable bd = new BitmapDrawable(bmp);
-            view.setBackgroundDrawable(bd);
-        } else {
-            BitmapFactory.Options bfoOptions = new BitmapFactory.Options();
-            bfoOptions.inScaled = false;
-            Bitmap bmp = BitmapFactory.decodeResource(getResources(),
-                    R.drawable.login_background_hen, bfoOptions);
-            DisplayMetrics dm = new DisplayMetrics();
-            getWindowManager().getDefaultDisplay().getMetrics(dm);
-            int width = dm.widthPixels;
-            int heigth = dm.heightPixels;
-            double phoneheigthtoheigth = (double) heigth / width;
-            int bitmapwidth = 1920;
-            int bitmapheigth = 1000;
-            double bitmapheigthtoheigth = (double) bitmapheigth / bitmapwidth;
-            ;
-            if (phoneheigthtoheigth > bitmapheigthtoheigth) {
-                int backbitmapwidth = (int) (1000 / phoneheigthtoheigth);
-                int cutwidth = (int) (1920 - backbitmapwidth) / 2;
-                bmp = Bitmap.createBitmap(bmp, cutwidth, 0, backbitmapwidth,
-                        bitmapheigth);
-            } else if (phoneheigthtoheigth < bitmapheigthtoheigth) {
-                int cutheigth = (int) (bitmapwidth * phoneheigthtoheigth);
-                bmp = Bitmap.createBitmap(bmp, 0, 0, bitmapwidth, cutheigth);
-            }
-            BitmapDrawable bd = new BitmapDrawable(bmp);
-            view.setBackgroundDrawable(bd);
-        }
-    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -271,7 +261,7 @@ public class LoginActivity extends SwipeBackAppCompatActivity implements
     @Override
     protected void onResume() {
         if (PhoneConfiguration.getInstance().fullscreen) {
-            ActivityUtil.getInstance().setFullScreen(view);
+            //ActivityUtil.getInstance().setFullScreen(view);
         }
         if (alreadylogin && needtopost) {
             finish();
@@ -279,19 +269,6 @@ public class LoginActivity extends SwipeBackAppCompatActivity implements
         super.onResume();
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            default:
-                // case android.R.id.home:
-                // Intent intent = new Intent(this, MainActivity.class);
-                // intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                // startActivity(intent);
-                finish();
-                break;
-        }
-        return super.onOptionsItemSelected(item);
-    }
 
     @Override
     public void authcodefinishLoad(Bitmap authimg, String authcode) {

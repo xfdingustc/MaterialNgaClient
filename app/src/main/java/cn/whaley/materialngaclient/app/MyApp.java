@@ -10,6 +10,7 @@ import android.os.Environment;
 import android.util.Log;
 
 import com.alibaba.fastjson.JSON;
+import com.orhanobut.logger.Logger;
 import com.squareup.leakcanary.LeakCanary;
 
 import java.io.File;
@@ -67,6 +68,12 @@ public class MyApp extends Application implements PerferenceConstant {
         crashHandler.init(getApplicationContext());
 
         NetUtil.init(this);
+
+
+        Logger.init(TAG)
+                .hideThreadInfo()
+                .methodCount(1);
+
 
         super.onCreate();
     }

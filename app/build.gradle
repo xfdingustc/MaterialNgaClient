@@ -26,12 +26,12 @@ repositories {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile(name:'PagerSlidingTabStrip', ext:'aar')
-    compile(name:'PinterestLikeAdapterView', ext:'aar')
-    compile(name:'ActionBar-PullToRefresh-Library', ext:'aar')
-    compile(name:'ActionBar-PullToRefresh', ext:'aar')
-    compile(name:'SwipeBackLayoutLibrary', ext:'aar')
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+    compile(name: 'PagerSlidingTabStrip', ext: 'aar')
+    compile(name: 'PinterestLikeAdapterView', ext: 'aar')
+    compile(name: 'ActionBar-PullToRefresh-Library', ext: 'aar')
+    compile(name: 'ActionBar-PullToRefresh', ext: 'aar')
+    compile(name: 'SwipeBackLayoutLibrary', ext: 'aar')
     compile "com.android.support:support-v4:$Version_AndroidSupport"
     compile "com.android.support:design:$Version_AndroidSupport"
     compile 'com.alibaba:fastjson:1.2.31'
@@ -50,5 +50,10 @@ dependencies {
     compile 'com.android.support:appcompat-v7:25.3.1'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
     testCompile 'junit:junit:4.12'
-
+    compile 'com.squareup.retrofit2:retrofit:2.2.0'
+    compile 'com.squareup.retrofit2:adapter-rxjava:2.2.0'
+    compile 'com.squareup.retrofit2:converter-gson:2.2.0'
+    compile 'io.reactivex:rxjava:1.3.0'
+    compile 'io.reactivex:rxandroid:1.2.1'
+    compile 'com.orhanobut:logger:1.15'
 }

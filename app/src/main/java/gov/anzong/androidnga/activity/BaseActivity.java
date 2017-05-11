@@ -5,9 +5,11 @@ import android.os.Bundle;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import butterknife.BindView;
 import butterknife.ButterKnife;
 import gov.anzong.androidnga.R;
 import sp.phone.utils.ThemeManager;
@@ -20,6 +22,10 @@ public class BaseActivity extends ActionBarActivity {
 
     protected Toast toast;
 
+    @Nullable
+    @BindView(R.id.toolbar)
+    Toolbar toolbar;
+
     @Override
     public void setContentView(@LayoutRes int layoutResID) {
         super.setContentView(layoutResID);
@@ -31,6 +37,10 @@ public class BaseActivity extends ActionBarActivity {
         showToast(str);
     }
 
+
+    protected Toolbar getToolbar() {
+        return toolbar;
+    }
 
 
     protected void showToast(String res) {

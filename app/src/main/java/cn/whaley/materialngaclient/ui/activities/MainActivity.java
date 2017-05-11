@@ -151,15 +151,10 @@ public class MainActivity extends BaseActivity implements PerferenceConstant, Pa
     @BindView(R.id.view_pager)
     ViewPager viewPager;
 
-    @BindView(R.id.toolbar)
-    Toolbar toolbar;
-
     @BindView(R.id.tab_layout)
     TabLayout tabLayout;
 
     CircleImageView avatarView;
-
-    //private ViewFlipper flipper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -201,9 +196,9 @@ public class MainActivity extends BaseActivity implements PerferenceConstant, Pa
     private void initView() {
         setContentView(R.layout.mainfragment);
         setupNavView();
-        toolbar.setTitle(R.string.start_title);
-        toolbar.inflateMenu(R.menu.main_menu);
-        toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+        getToolbar().setTitle(R.string.start_title);
+        getToolbar().inflateMenu(R.menu.main_menu);
+        getToolbar().setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
                 switch (item.getItemId()) {
@@ -215,7 +210,7 @@ public class MainActivity extends BaseActivity implements PerferenceConstant, Pa
             }
         });
 
-        setSupportActionBar(toolbar);
+        setSupportActionBar(getToolbar());
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
 
@@ -223,7 +218,7 @@ public class MainActivity extends BaseActivity implements PerferenceConstant, Pa
     }
 
     private void setupActionBarToggle() {
-        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, toolbar, R.string.drawer_open, R.string.drawer_close);
+        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, getToolbar(), R.string.drawer_open, R.string.drawer_close);
         mDrawerLayout.setDrawerListener(mDrawerToggle);
         mDrawerToggle.syncState();
 
@@ -236,7 +231,7 @@ public class MainActivity extends BaseActivity implements PerferenceConstant, Pa
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.login:
-                        jumpToLogin();
+                        LoginActivity.launch(MainActivity.this);
                         break;
                     case R.id.yoo:
                         jumpToNearby();
@@ -382,79 +377,6 @@ public class MainActivity extends BaseActivity implements PerferenceConstant, Pa
 
     }
 
-
-//    void updateflipper(String userListString) {
-//        flipper.removeAllViews();
-//        BitmapFactory.Options bfoOptions = new BitmapFactory.Options();
-//        bfoOptions.inScaled = false;
-//        Bitmap bmp = BitmapFactory.decodeResource(getResources(),
-//                R.drawable.userdrawback, bfoOptions);
-//        DisplayMetrics dm = new DisplayMetrics();
-//        getWindowManager().getDefaultDisplay().getMetrics(dm);
-//        int width = dm.widthPixels;
-//        width = (int) (width * 0.8);
-//        if (width < 800) {
-//            bmp = Bitmap.createBitmap(bmp, (int) 400 - width / 2, 0, width, 55);
-//        }
-//        @SuppressWarnings("deprecation")
-//        BitmapDrawable bd = new BitmapDrawable(bmp);
-//        List<User> userList;
-//        if (StringUtil.isEmpty(userListString)) {
-//            flipper.addView(getUserView(null, 0, bd));// 传递回一个未登入的
-//        } else {
-//            userList = JSON.parseArray(userListString, User.class);
-//            if (userList.size() == 0) {
-//                flipper.addView(getUserView(null, 0, bd));// 传递回一个未登入的
-//            } else {
-//                for (int i = 1; i <= userList.size(); i++) {
-//                    flipper.addView(getUserView(userList, i - 1, bd));// 传递回一个未登入的
-//                }
-//            }
-//        }
-//
-//        // 动画效果
-//        rightInAnimation = AnimationUtils.loadAnimation(this, R.anim.right_in);
-//        rightOutAnimation = AnimationUtils
-//                .loadAnimation(this, R.anim.right_out);
-//    }
-
-    @SuppressWarnings("deprecation")
-    public View getUserView(List<User> userList, int position, BitmapDrawable bd) {
-        View privateview = getLayoutInflater().inflate(
-                R.layout.drawerloginuser, null);
-        RelativeLayout mRelativeLayout = (RelativeLayout) privateview
-                .findViewById(R.id.mainlisthead);
-        mRelativeLayout.setBackgroundDrawable(bd);
-        TextView loginstate = (TextView) privateview.findViewById(R.id.loginstate);
-        TextView loginnameandid = (TextView) privateview.findViewById(R.id.loginnameandid);
-        ImageView avatarImage = (ImageView) privateview.findViewById(R.id.avatarImage);
-        ImageView nextImage = (ImageView) privateview.findViewById(R.id.nextImage);
-        if (userList == null) {
-            loginstate.setText("未登录");
-            loginnameandid.setText("点击下面的登录账号登录");
-            avatarImage.setImageDrawable(getResources().getDrawable(
-                    R.drawable.drawerdefaulticon));
-            nextImage.setVisibility(View.GONE);
-        } else {
-            if (userList.size() <= 1) {
-                nextImage.setVisibility(View.GONE);
-            }
-            if (userList.size() == 1) {
-                loginstate.setText("已登录1个账户");
-            } else {
-                loginstate.setText("已登录"
-                        + String.valueOf(userList.size() + "个账户,点击切换"));
-            }
-            if (userList.size() > 0) {
-                User user = userList.get(position);
-                loginnameandid.setText("当前:" + user.getNickName() + "("
-                        + user.getUserId() + ")");
-                handleUserAvatat(avatarImage, user.getUserId());
-            }
-        }
-        return privateview;
-    }
-
     public void refreshheadview() {
         DisplayMetrics dm = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(dm);
@@ -589,25 +511,7 @@ public class MainActivity extends BaseActivity implements PerferenceConstant, Pa
         return (xlarge || large) && ActivityUtil.isGreaterThan_2_3_3();
     }
 
-    private void jumpToLogin() {
-        if (isTablet()) {
-            DialogFragment df = new LoginFragment();
-            df.show(getSupportFragmentManager(), "login");
-            return;
-        }
 
-        Intent intent = new Intent();
-        intent.setClass(MainActivity.this, LoginActivity.class);
-        try {
-            startActivity(intent);
-            if (PhoneConfiguration.getInstance().showAnimation) {
-                overridePendingTransition(R.anim.zoom_enter, R.anim.zoom_exit);
-            }
-        } catch (Exception e) {
-
-        }
-
-    }
 
 
 
@@ -1139,7 +1043,7 @@ public class MainActivity extends BaseActivity implements PerferenceConstant, Pa
             if (!StringUtil.isEmpty(config.getCookie())) {
                 url = url + "&" + config.getCookie().replace("; ", "&");
             } else if (fid < 0) {
-                jumpToLogin();
+                LoginActivity.launch(MainActivity.this);
                 return;
             }
             addToRecent();
