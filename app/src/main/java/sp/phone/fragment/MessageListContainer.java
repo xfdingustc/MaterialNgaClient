@@ -15,7 +15,7 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 
 import gov.anzong.androidnga.R;
-import gov.anzong.androidnga.activity.MainActivity;
+import cn.whaley.materialngaclient.ui.activities.MainActivity;
 import sp.phone.adapter.AppendableMessageAdapter;
 import sp.phone.bean.MessageListInfo;
 import sp.phone.bean.PerferenceConstant;

@@ -15,7 +15,11 @@
   -->
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <style name="AppTheme" parent="style/Theme.AppCompat">
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="colorPrimary">@color/material_green_500</item>
+        <item name="colorPrimaryDark">@color/material_green_700</item>
+        <item name="colorAccent">@color/material_amber_500</item>
+        <item name="toolbarColor">@color/material_green_500</item>
         <item name="android:actionOverflowButtonStyle">@style/OverFlow</item>
     </style>
 

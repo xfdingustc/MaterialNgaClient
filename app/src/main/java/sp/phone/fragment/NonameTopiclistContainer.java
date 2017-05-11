@@ -18,7 +18,7 @@ import android.widget.Toast;
 
 import gov.anzong.androidnga.R;
 import gov.anzong.androidnga.Utils;
-import gov.anzong.androidnga.activity.MainActivity;
+import cn.whaley.materialngaclient.ui.activities.MainActivity;
 import noname.gson.parse.NonameThreadResponse;
 import sp.phone.adapter.AppendableNonameTopicAdapter;
 import sp.phone.bean.PerferenceConstant;

@@ -2,9 +2,9 @@ package gov.anzong.androidnga.activity;
 
 public class Category {
 
-    String mTitle;
+    public String mTitle;
 
-    Category(String title) {
+    public Category(String title) {
         mTitle = title;
     }
 }

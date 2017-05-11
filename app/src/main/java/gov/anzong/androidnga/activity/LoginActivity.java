@@ -25,7 +25,6 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
@@ -34,6 +33,7 @@ import java.net.URLEncoder;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import cn.whaley.materialngaclient.ui.activities.MainActivity;
 import gov.anzong.androidnga.R;
 import sp.phone.adapter.UserListAdapter;
 import sp.phone.bean.PerferenceConstant;

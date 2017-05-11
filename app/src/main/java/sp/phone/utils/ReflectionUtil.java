@@ -8,8 +8,6 @@ import android.widget.AdapterView.OnItemClickListener;
 
 import java.lang.reflect.Method;
 
-import gov.anzong.androidnga.activity.MainActivity;
-
 public class ReflectionUtil {
     public static boolean actionBar_setDisplayOption(ActionBarActivity activity, int flags) {
         boolean ret = true;

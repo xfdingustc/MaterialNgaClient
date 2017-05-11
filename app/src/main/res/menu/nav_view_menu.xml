@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group android:checkableBehavior="single">
+        <item android:id="@+id/login" android:title="@string/login"
+            android:icon="@drawable/ic_login"/>
+
+
+
+    </group>
+
+    <group android:checkableBehavior="single">
+        <item android:id="@+id/message" android:title="@string/message"
+            android:icon="@drawable/ic_action_email"/>
+
+        <item android:id="@+id/search" android:title="@string/search_user"
+            android:icon="@drawable/action_search"/>
+
+        <item android:id="@+id/from_url" android:title="@string/from_url"
+            android:icon="@drawable/ic_action_forward"/>
+
+        <item android:id="@+id/add_forum" android:title="@string/add_forum"
+            android:icon="@drawable/ic_action_add_to_queue"/>
+
+        <item android:id="@+id/clear_recent" android:title="@string/clear_recent"
+            android:icon="@drawable/ic_action_warning"/>
+
+        <item android:id="@+id/recent_reply" android:title="@string/recent_reply"
+            android:icon="@drawable/ic_action_gun"/>
+
+
+    </group>
+
+    <group android:checkableBehavior="single">
+        <item android:id="@+id/my_topic" android:title="@string/my_topic"
+            android:icon="@drawable/action_search"/>
+
+        <item android:id="@+id/my_reply" android:title="@string/my_reply"
+            android:icon="@drawable/action_search"/>
+
+        <item android:id="@+id/my_favorate" android:title="@string/my_favarate"
+            android:icon="@drawable/ic_action_forward"/>
+
+
+
+    </group>
+
+    <group android:checkableBehavior="single">
+        <item android:id="@+id/yoo" android:title="@string/yoo"
+            android:icon="@drawable/ic_menu_mylocation"/>
+
+        <item android:id="@+id/anonymous" android:title="@string/anonymous"
+            android:icon="@drawable/ic_action_noname"/>
+
+        <item android:id="@+id/about" android:title="@string/about"
+            android:icon="@drawable/ic_action_about"/>
+
+
+
+    </group>
+</menu>

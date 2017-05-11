@@ -325,4 +325,16 @@
 
     <string name="swipeback">启用侧滑返回</string>
     <string name="file_saved">图片已保存在：</string>
+    <string name="message">短消息</string>
+    <string name="search_user">搜索用户</string>
+    <string name="from_url">由URL读取</string>
+    <string name="add_forum">添加版面</string>
+    <string name="clear_recent">清空最近访问</string>
+    <string name="recent_reply">最近被喷</string>
+    <string name="my_topic">我的主题</string>
+    <string name="my_reply">我的回复</string>
+    <string name="my_favarate">收藏夹</string>
+    <string name="yoo">Yoooo~</string>
+    <string name="anonymous">大漩涡匿名版</string>
+    <string name="about">关于</string>
 </resources>
