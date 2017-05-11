@@ -29,15 +29,13 @@ import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
 import butterknife.BindView;
+import butterknife.OnClick;
 import cn.whaley.materialngaclient.app.Consts;
 import cn.whaley.materialngaclient.app.MyApp;
 import cn.whaley.materialngaclient.rest.INgaApi;
@@ -107,6 +105,11 @@ public class LoginActivity extends SwipeBackAppCompatActivity implements Perfere
 
     @BindView(R.id.user_list)
     ListView userList;
+
+    @OnClick({R.id.authcode_refresh, R.id.authcode_img})
+    public void onAuthCodeRefreshClicked() {
+        reloadAuthCode();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -180,25 +183,8 @@ public class LoginActivity extends SwipeBackAppCompatActivity implements Perfere
                 }
             }
         }
-        authcodeimgRefresh.setOnClickListener(new OnClickListener() {
 
-            @Override
-            public void onClick(View v) {
-                // TODO Auto-generated method stub
-                reloadauthcode();
-            }
-
-        });
-        authcodeImg.setOnClickListener(new OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                // TODO Auto-generated method stub
-                reloadauthcode();
-            }
-
-        });
-        reloadauthcode();
+        reloadAuthCode();
     }
 
     private void initViews() {
@@ -207,33 +193,9 @@ public class LoginActivity extends SwipeBackAppCompatActivity implements Perfere
     }
 
 
-    private String encodeCookie(List<String> cookies) {
-        StringBuilder sb = new StringBuilder();
-        Set<String> set = new HashSet<>();
-        for (String cookie : cookies) {
-            String[] arr = cookie.split(";");
-            for (String s : arr) {
-                if (set.contains(s)) continue;
-                set.add(s);
 
-            }
-        }
 
-        Iterator<String> ite = set.iterator();
-        while (ite.hasNext()) {
-            String cookie = ite.next();
-            sb.append(cookie).append(";");
-        }
-
-        int last = sb.lastIndexOf(";");
-        if (sb.length() - 1 == last) {
-            sb.deleteCharAt(last);
-        }
-
-        return sb.toString();
-    }
-
-    private void reloadauthcode() {
+    private void reloadAuthCode() {
         authcodeCookie = "";
         authcodeText.setText("");
 
@@ -277,7 +239,6 @@ public class LoginActivity extends SwipeBackAppCompatActivity implements Perfere
                 .map(new Func1<ResponseBody, Bitmap>() {
                     @Override
                     public Bitmap call(ResponseBody responseBody) {
-
                         return BitmapFactory.decodeStream(responseBody.byteStream());
                     }
                 })
@@ -303,11 +264,11 @@ public class LoginActivity extends SwipeBackAppCompatActivity implements Perfere
 
     }
 
-    private void reloadauthcode(String error) {
+    private void reloadAuthCode(String error) {
         if (!StringUtil.isEmpty(error)) {
             showToast(error);
         }
-        reloadauthcode();
+        reloadAuthCode();
     }
 
     private void updateThemeUI() {
@@ -339,13 +300,6 @@ public class LoginActivity extends SwipeBackAppCompatActivity implements Perfere
         super.onResume();
     }
 
-
-    public void authcodefinishLoad(Bitmap authimg, String authcode) {
-        this.authcodeCookie = authcode;
-        authcodeImg.setImageBitmap(authimg);
-    }
-
-
     public void authcodefinishLoadError() {
         showToast("载入验证码失败，请点击刷新重新加载");
         authcodeImg.setImageDrawable(getResources().getDrawable(R.drawable.q_vcode_retry));
@@ -375,7 +329,7 @@ public class LoginActivity extends SwipeBackAppCompatActivity implements Perfere
                     bodyBuffer.append("email=");
                     if (StringUtil.isEmpty(authcodeCookie)) {
                         showToast("验证码信息错误，请重试");
-                        reloadauthcode();
+                        reloadAuthCode();
                         return;
                     }
                     name = userText.getText().toString();
@@ -383,7 +337,7 @@ public class LoginActivity extends SwipeBackAppCompatActivity implements Perfere
                             StringUtil.isEmpty(passwordText.getText().toString()) ||
                             StringUtil.isEmpty(authcodeText.getText().toString())) {
                         showToast("内容缺少，请检查后再试");
-                        reloadauthcode();
+                        reloadAuthCode();
                         return;
                     }
                     try {
@@ -504,7 +458,7 @@ public class LoginActivity extends SwipeBackAppCompatActivity implements Perfere
                     loading = false;
                 }
                 if (!StringUtil.isEmpty(errorstr)) {
-                    reloadauthcode(errorstr);
+                    reloadAuthCode(errorstr);
                     super.onPostExecute(result);
                 } else {
                     if (result.booleanValue()) {

@@ -984,23 +984,7 @@ public class MainActivity extends BaseActivity implements PerferenceConstant, Pa
 
 
 
-    public class MyURLSpan extends ClickableSpan {
 
-        private String mUrl;
-
-        MyURLSpan(String url) {
-            mUrl = url;
-        }
-
-        @Override
-        public void onClick(View widget) {
-
-            Intent intent = new Intent();
-            intent.putExtra("path", mUrl);
-            intent.setClass(MainActivity.this, WebViewerActivity.class);
-            startActivity(intent);
-        }
-    }
 
 
 
