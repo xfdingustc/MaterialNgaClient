@@ -24,20 +24,32 @@ import android.widget.ListView;
 
 import com.orhanobut.logger.Logger;
 
-import java.io.InputStream;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.TimeUnit;
 
 import butterknife.BindView;
+import cn.whaley.materialngaclient.app.Consts;
 import cn.whaley.materialngaclient.app.MyApp;
-import cn.whaley.materialngaclient.rest.NgaService;
+import cn.whaley.materialngaclient.rest.INgaApi;
 import cn.whaley.materialngaclient.ui.activities.MainActivity;
 import gov.anzong.androidnga.R;
+import okhttp3.Interceptor;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 import okhttp3.ResponseBody;
+import retrofit2.Retrofit;
+import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Func1;
@@ -45,20 +57,18 @@ import rx.schedulers.Schedulers;
 import sp.phone.adapter.UserListAdapter;
 import sp.phone.bean.PerferenceConstant;
 import sp.phone.forumoperation.HttpPostClient;
-import sp.phone.interfaces.OnAuthcodeLoadFinishedListener;
-import sp.phone.task.AccountAuthcodeImageReloadTask;
 import sp.phone.utils.PhoneConfiguration;
 import sp.phone.utils.ReflectionUtil;
 import sp.phone.utils.StringUtil;
 import sp.phone.utils.ThemeManager;
 
-public class LoginActivity extends SwipeBackAppCompatActivity implements PerferenceConstant, OnAuthcodeLoadFinishedListener {
+public class LoginActivity extends SwipeBackAppCompatActivity implements PerferenceConstant {
     private static final String TAG = LoginActivity.class.getSimpleName();
 
     Object commit_lock = new Object();
     String name;
 
-    AccountAuthcodeImageReloadTask loadauthcodetask;
+
     private String action, messagemode;
     private String tid;
     private int fid;
@@ -68,7 +78,7 @@ public class LoginActivity extends SwipeBackAppCompatActivity implements Perfere
     private String title;
     private int mid;
     private boolean alreadylogin = false;
-    private String authcode_cookie;
+    private String authcodeCookie;
     private boolean loading = false;
 
     public static void launch(Activity activity) {
@@ -196,19 +206,78 @@ public class LoginActivity extends SwipeBackAppCompatActivity implements Perfere
         toolbar.setTitle(R.string.login);
     }
 
-    private void reloadauthcode() {
-        authcode_cookie = "";
-        authcodeText.setText("");
-        if (loadauthcodetask != null) {
-            loadauthcodetask.cancel(true);
+
+    private String encodeCookie(List<String> cookies) {
+        StringBuilder sb = new StringBuilder();
+        Set<String> set = new HashSet<>();
+        for (String cookie : cookies) {
+            String[] arr = cookie.split(";");
+            for (String s : arr) {
+                if (set.contains(s)) continue;
+                set.add(s);
+
+            }
         }
+
+        Iterator<String> ite = set.iterator();
+        while (ite.hasNext()) {
+            String cookie = ite.next();
+            sb.append(cookie).append(";");
+        }
+
+        int last = sb.lastIndexOf(";");
+        if (sb.length() - 1 == last) {
+            sb.deleteCharAt(last);
+        }
+
+        return sb.toString();
+    }
+
+    private void reloadauthcode() {
+        authcodeCookie = "";
+        authcodeText.setText("");
+
         authcodeImg.setImageDrawable(getResources().getDrawable(R.drawable.q_vcode));
-//        loadauthcodetask = new AccountAuthcodeImageReloadTask(this, this);
-//        loadauthcodetask.execute();
-        NgaService.createNgaApiService().getRegCode("gen_reg")
+
+        OkHttpClient.Builder clientBuilder = new OkHttpClient.Builder();
+
+        clientBuilder.addInterceptor(new Interceptor() {
+            @Override
+            public Response intercept(Chain chain) throws IOException {
+                Request request = chain.request();
+                Response response = chain.proceed(request);
+                if (!response.headers("set-cookie").isEmpty()) {
+                    List<String> cookies = response.headers("set-cookie");
+                    for (String cookie : cookies) {
+                        Logger.t(TAG).d("one cookie: " + cookie);
+                        cookie = cookie.substring(0, cookie.indexOf(';'));
+                        Logger.t(TAG).d("cookie:" + cookie);
+                        if (cookie.indexOf("reg_vcode=") == 0 && cookie.indexOf("deleted") < 0) {
+                            authcodeCookie = cookie.substring(10);
+                            Logger.t(TAG).d("authcodeCookie:" + authcodeCookie);
+                        }
+                    }
+
+
+                }
+
+                return response;
+            }
+        })
+                .readTimeout(15000, TimeUnit.MILLISECONDS)
+                .connectTimeout(15000, TimeUnit.MILLISECONDS);
+
+        new Retrofit.Builder()
+                .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
+                .baseUrl(Consts.BASE_URL)
+                .client(clientBuilder.build())
+                .build()
+                .create(INgaApi.class)
+                .getRegCode("gen_reg")
                 .map(new Func1<ResponseBody, Bitmap>() {
                     @Override
                     public Bitmap call(ResponseBody responseBody) {
+
                         return BitmapFactory.decodeStream(responseBody.byteStream());
                     }
                 })
@@ -223,6 +292,7 @@ public class LoginActivity extends SwipeBackAppCompatActivity implements Perfere
                     @Override
                     public void onError(Throwable e) {
                         Logger.t(TAG).d("on error " + e.toString());
+                        authcodefinishLoadError();
                     }
 
                     @Override
@@ -270,17 +340,16 @@ public class LoginActivity extends SwipeBackAppCompatActivity implements Perfere
     }
 
 
-    @Override
     public void authcodefinishLoad(Bitmap authimg, String authcode) {
-        this.authcode_cookie = authcode;
+        this.authcodeCookie = authcode;
         authcodeImg.setImageBitmap(authimg);
     }
 
-    @Override
+
     public void authcodefinishLoadError() {
         showToast("载入验证码失败，请点击刷新重新加载");
         authcodeImg.setImageDrawable(getResources().getDrawable(R.drawable.q_vcode_retry));
-        authcode_cookie = "";
+        authcodeCookie = "";
         authcodeText.setText("");
         authcodeText.setSelected(true);
     }
@@ -304,7 +373,7 @@ public class LoginActivity extends SwipeBackAppCompatActivity implements Perfere
                 } else {
                     StringBuffer bodyBuffer = new StringBuffer();
                     bodyBuffer.append("email=");
-                    if (StringUtil.isEmpty(authcode_cookie)) {
+                    if (StringUtil.isEmpty(authcodeCookie)) {
                         showToast("验证码信息错误，请重试");
                         reloadauthcode();
                         return;
@@ -352,7 +421,7 @@ public class LoginActivity extends SwipeBackAppCompatActivity implements Perfere
             protected Boolean doInBackground(String... params) {
                 String url = params[0];
                 String body = params[1];
-                String cookie = "reg_vcode=" + authcode_cookie;
+                String cookie = "reg_vcode=" + authcodeCookie;
                 HttpURLConnection conn = new HttpPostClient(url, cookie).post_body(body);
                 return validate(conn);
 
