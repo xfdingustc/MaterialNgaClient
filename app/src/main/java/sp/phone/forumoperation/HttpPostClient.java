@@ -7,7 +7,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Locale;
 
-import gov.anzong.androidnga.activity.MyApp;
+import cn.whaley.materialngaclient.app.MyApp;
 
 public class HttpPostClient {
     private static final String LOG_TAG = HttpPostClient.class

@@ -24,7 +24,7 @@ import java.util.List;
 
 import gov.anzong.androidnga.R;
 import gov.anzong.androidnga.Utils;
-import gov.anzong.androidnga.activity.MyApp;
+import cn.whaley.materialngaclient.app.MyApp;
 import gov.anzong.androidnga.activity.ReplyListActivity;
 import sp.phone.bean.MsgNotificationObject;
 import sp.phone.bean.NotificationObject;

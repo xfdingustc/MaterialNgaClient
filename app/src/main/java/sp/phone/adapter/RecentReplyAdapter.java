@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import gov.anzong.androidnga.R;
-import gov.anzong.androidnga.activity.MyApp;
+import cn.whaley.materialngaclient.app.MyApp;
 import sp.phone.bean.NotificationObject;
 import sp.phone.bean.PerferenceConstant;
 import sp.phone.bean.User;

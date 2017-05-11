@@ -25,7 +25,7 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 
 import gov.anzong.androidnga.R;
-import gov.anzong.androidnga.activity.MyApp;
+import cn.whaley.materialngaclient.app.MyApp;
 import sp.phone.adapter.UserListAdapter;
 import sp.phone.bean.PerferenceConstant;
 import sp.phone.forumoperation.HttpPostClient;

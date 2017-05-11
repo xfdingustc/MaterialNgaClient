@@ -33,6 +33,7 @@ import java.net.URLEncoder;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import cn.whaley.materialngaclient.app.MyApp;
 import cn.whaley.materialngaclient.ui.activities.MainActivity;
 import gov.anzong.androidnga.R;
 import sp.phone.adapter.UserListAdapter;

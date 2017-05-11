@@ -19,7 +19,7 @@ import java.util.Date;
 import java.util.TimeZone;
 
 import gov.anzong.androidnga.R;
-import gov.anzong.androidnga.activity.MyApp;
+import cn.whaley.materialngaclient.app.MyApp;
 import sp.phone.utils.HttpUtil;
 import sp.phone.utils.PhoneConfiguration;
 import sp.phone.utils.StringUtil;

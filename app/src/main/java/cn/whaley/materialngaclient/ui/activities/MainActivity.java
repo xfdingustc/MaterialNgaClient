@@ -11,11 +11,9 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.content.res.AssetFileDescriptor;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.PorterDuff.Mode;
@@ -23,7 +21,6 @@ import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
-import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
@@ -40,33 +37,23 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
-import android.text.Html;
-import android.text.Spannable;
-import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
-import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
-import android.text.style.URLSpan;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import android.widget.ViewFlipper;
-
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.alibaba.fastjson.JSON;
 
 import java.io.File;
@@ -87,12 +74,10 @@ import gov.anzong.androidnga.R;
 import gov.anzong.androidnga.Utils;
 import gov.anzong.androidnga.activity.BaseActivity;
 import gov.anzong.androidnga.activity.LoginActivity;
-import gov.anzong.androidnga.activity.MenuAdapter;
-import gov.anzong.androidnga.activity.MyApp;
+import cn.whaley.materialngaclient.app.MyApp;
 import gov.anzong.androidnga.activity.NearbyUserActivity;
 import gov.anzong.androidnga.activity.SettingsActivity;
 import gov.anzong.androidnga.activity.WebViewerActivity;
-import gov.anzong.meizi.MeiziMainActivity;
 import sp.phone.adapter.BoardPagerAdapter;
 import sp.phone.bean.AvatarTag;
 import sp.phone.bean.Board;
@@ -372,15 +357,8 @@ public class MainActivity extends BaseActivity implements PerferenceConstant, Pa
 
 
     private void about_ngaclient() {
-        LayoutInflater layoutInflater = getLayoutInflater();
-        final View view = layoutInflater.inflate(R.layout.client_dialog, null);
-        AlertDialog.Builder alert = new AlertDialog.Builder(this);
-        alert.setView(view);
-        alert.setTitle("关于");
         String versionName = null;
         int versionvalue = 0;
-        TextView textview = (TextView) view
-                .findViewById(R.id.client_device_dialog);
         try {
             PackageManager pm = MainActivity.this.getPackageManager();
             PackageInfo pi = pm.getPackageInfo(
@@ -395,45 +373,13 @@ public class MainActivity extends BaseActivity implements PerferenceConstant, Pa
         }
         String textviewtext = String.format(MainActivity.this
                 .getString(R.string.about_client), versionName, versionvalue);
-        textview.setText(Html.fromHtml(textviewtext));
 
-        textview.setMovementMethod(LinkMovementMethod.getInstance());
-        CharSequence text = textview.getText();
-        if (text instanceof Spannable) {
-            int end = text.length();
-            Spannable sp = (Spannable) textview.getText();
-            URLSpan[] urls = sp.getSpans(0, end, URLSpan.class);
-            SpannableStringBuilder style = new SpannableStringBuilder(text);
-            style.clearSpans();// should clear old spans
-            for (URLSpan url : urls) {
-                MyURLSpan myURLSpan = new MyURLSpan(url.getURL());
-                style.setSpan(myURLSpan, sp.getSpanStart(url),
-                        sp.getSpanEnd(url), Spannable.SPAN_EXCLUSIVE_INCLUSIVE);
-            }
-            textview.setText(style);
-        }
-        alert.setPositiveButton("知道了", new DialogInterface.OnClickListener() {
+        new MaterialDialog.Builder(this)
+                .title(R.string.about)
+                .content(textviewtext)
+                .positiveText(R.string.got_it)
+                .show();
 
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                if (PhoneConfiguration.getInstance().fullscreen) {
-                    activityUtil.setFullScreen(view);
-                }
-            }
-        });
-        final AlertDialog dialog = alert.create();
-        dialog.show();
-        dialog.setOnDismissListener(new AlertDialog.OnDismissListener() {
-
-            @Override
-            public void onDismiss(DialogInterface arg0) {
-                dialog.dismiss();
-                if (PhoneConfiguration.getInstance().fullscreen) {
-                    activityUtil.setFullScreen(view);
-                }
-            }
-
-        });
     }
 
 

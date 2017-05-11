@@ -60,7 +60,7 @@ import java.lang.reflect.Field;
 import java.util.HashSet;
 
 import gov.anzong.androidnga.R;
-import gov.anzong.androidnga.activity.MyApp;
+import cn.whaley.materialngaclient.app.MyApp;
 import gov.anzong.androidnga.util.NetUtil;
 import noname.gson.parse.NonameReadBody;
 import sp.phone.adapter.NonameArticleListAdapter;

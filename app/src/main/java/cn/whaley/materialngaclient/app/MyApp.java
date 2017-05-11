@@ -1,4 +1,4 @@
-package gov.anzong.androidnga.activity;
+package cn.whaley.materialngaclient.app;
 
 import android.annotation.TargetApi;
 import android.app.Application;
@@ -10,6 +10,7 @@ import android.os.Environment;
 import android.util.Log;
 
 import com.alibaba.fastjson.JSON;
+import com.squareup.leakcanary.LeakCanary;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -42,6 +43,12 @@ public class MyApp extends Application implements PerferenceConstant {
 
     @Override
     public void onCreate() {
+        if (LeakCanary.isInAnalyzerProcess(this)) {
+            // This process is dedicated to LeakCanary for heap analysis.
+            // You should not init your app in this process.
+            return;
+        }
+        LeakCanary.install(this);
         Log.w(TAG, "app nga androind start");
         if (config == null)
             config = PhoneConfiguration.getInstance();

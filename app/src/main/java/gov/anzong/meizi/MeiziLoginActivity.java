@@ -20,7 +20,7 @@ import java.net.HttpURLConnection;
 import java.net.URLEncoder;
 
 import gov.anzong.androidnga.R;
-import gov.anzong.androidnga.activity.MyApp;
+import cn.whaley.materialngaclient.app.MyApp;
 import gov.anzong.androidnga.activity.SwipeBackAppCompatActivity;
 import sp.phone.bean.PerferenceConstant;
 import sp.phone.forumoperation.HttpPostClient;

@@ -25,7 +25,7 @@ import com.alibaba.fastjson.JSON;
 import java.util.List;
 
 import gov.anzong.androidnga.R;
-import gov.anzong.androidnga.activity.MyApp;
+import cn.whaley.materialngaclient.app.MyApp;
 import sp.phone.adapter.RecentReplyAdapter;
 import sp.phone.bean.NotificationObject;
 import sp.phone.bean.PerferenceConstant;
