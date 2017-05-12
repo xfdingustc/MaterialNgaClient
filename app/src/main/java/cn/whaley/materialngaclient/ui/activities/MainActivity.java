@@ -85,7 +85,7 @@ import sp.phone.bean.BoardCategory;
 import sp.phone.bean.BoardHolder;
 import sp.phone.bean.PerferenceConstant;
 import sp.phone.bean.User;
-import sp.phone.fragment.LoginFragment;
+
 import sp.phone.fragment.ProfileSearchDialogFragment;
 import sp.phone.fragment.TopicListContainer;
 import sp.phone.interfaces.PageCategoryOwnner;

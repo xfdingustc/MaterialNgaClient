@@ -14,4 +14,6 @@ import rx.Observable;
 public interface INgaApi {
     @GET("q_vcode.php")
     Observable<ResponseBody> getRegCode(@Query("_act") String action);
+
+
 }

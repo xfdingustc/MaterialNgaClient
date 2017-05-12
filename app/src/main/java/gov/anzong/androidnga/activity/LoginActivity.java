@@ -113,7 +113,6 @@ public class LoginActivity extends SwipeBackAppCompatActivity implements Perfere
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        // TODO Auto-generated method stub
         // requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
         super.onCreate(savedInstanceState);
@@ -126,9 +125,7 @@ public class LoginActivity extends SwipeBackAppCompatActivity implements Perfere
         }
         ThemeManager.SetContextTheme(this);
 
-
         initViews();
-
 
         userList.setAdapter(new UserListAdapter(this, userText));
 
@@ -143,18 +140,7 @@ public class LoginActivity extends SwipeBackAppCompatActivity implements Perfere
 
         LoginButtonListener listener = new LoginButtonListener(postUrl);
         buttonLogin.setOnClickListener(listener);
-        updateThemeUI();
-        Timer timer = new Timer();
-        timer.schedule(new TimerTask() {
 
-            public void run() {
-                InputMethodManager inputManager = (InputMethodManager) userText
-                        .getContext().getSystemService(
-                                Context.INPUT_METHOD_SERVICE);
-                inputManager.showSoftInput(userText, 0);
-            }
-
-        }, 500);
         Intent intent = this.getIntent();
         action = intent.getStringExtra("action");
         messagemode = intent.getStringExtra("messagemode");
@@ -191,8 +177,6 @@ public class LoginActivity extends SwipeBackAppCompatActivity implements Perfere
         setContentView(R.layout.login);
         toolbar.setTitle(R.string.login);
     }
-
-
 
 
     private void reloadAuthCode() {
@@ -271,15 +255,7 @@ public class LoginActivity extends SwipeBackAppCompatActivity implements Perfere
         reloadAuthCode();
     }
 
-    private void updateThemeUI() {
-//        ThemeManager tm = ThemeManager.getInstance();
-//        if (tm.getMode() == ThemeManager.MODE_NIGHT) {
-//            view.setBackgroundResource(ThemeManager.getInstance()
-//                    .getBackgroundColor());
-//        } else {
-//            setbackgroundbitmap();
-//        }
-    }
+
 
 
     @Override
@@ -353,6 +329,7 @@ public class LoginActivity extends SwipeBackAppCompatActivity implements Perfere
                         e.printStackTrace();
                     }
                     new LoginTask(v).execute(loginUrl, bodyBuffer.toString());
+                    doLogin();
 
                 }
                 loading = true;
@@ -546,6 +523,10 @@ public class LoginActivity extends SwipeBackAppCompatActivity implements Perfere
             }
 
         }
+
+    }
+
+    private void doLogin() {
 
     }
 
