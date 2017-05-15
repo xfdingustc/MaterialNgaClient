@@ -2,8 +2,14 @@ package cn.whaley.materialngaclient.rest;
 
 import java.io.InputStream;
 
+import okhttp3.Response;
 import okhttp3.ResponseBody;
+import retrofit2.http.Body;
 import retrofit2.http.GET;
+import retrofit2.http.HEAD;
+import retrofit2.http.Header;
+import retrofit2.http.Headers;
+import retrofit2.http.POST;
 import retrofit2.http.Query;
 import rx.Observable;
 
@@ -16,4 +22,7 @@ public interface INgaApi {
     Observable<ResponseBody> getRegCode(@Query("_act") String action);
 
 
+    @Headers("Content-Type: application/x-www-form-urlencoded")
+    @POST("q_account.php?_act=login&print=login")
+    Observable<ResponseBody> login(@Body String postBody);
 }

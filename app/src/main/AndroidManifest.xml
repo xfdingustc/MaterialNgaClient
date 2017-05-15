@@ -41,7 +41,7 @@
       </intent-filter>
     </activity>
     <activity
-        android:name=".activity.LoginActivity"
+        android:name="cn.whaley.materialngaclient.ui.activities.LoginActivity"
         android:theme="@style/SwipeBackTheme" />
     <activity
         android:name="gov.anzong.meizi.MeiziLoginActivity"

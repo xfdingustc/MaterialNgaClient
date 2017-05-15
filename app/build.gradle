@@ -56,4 +56,6 @@ dependencies {
     compile 'io.reactivex:rxjava:1.3.0'
     compile 'io.reactivex:rxandroid:1.2.1'
     compile 'com.orhanobut:logger:1.15'
+    compile 'com.squareup.retrofit2:converter-scalars:2.2.0'
+    compile 'com.lhalcyon:okhttp-logger-interceptor:1.0.2'
 }

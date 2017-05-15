@@ -1,7 +1,6 @@
-package gov.anzong.androidnga.activity;
+package cn.whaley.materialngaclient.ui.activities;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -15,13 +14,13 @@ import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.WindowManager;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 
+import com.halcyon.logger.HttpLogInterceptor;
 import com.orhanobut.logger.Logger;
 
 import java.io.IOException;
@@ -30,8 +29,6 @@ import java.net.HttpURLConnection;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
 import butterknife.BindView;
@@ -39,8 +36,10 @@ import butterknife.OnClick;
 import cn.whaley.materialngaclient.app.Consts;
 import cn.whaley.materialngaclient.app.MyApp;
 import cn.whaley.materialngaclient.rest.INgaApi;
-import cn.whaley.materialngaclient.ui.activities.MainActivity;
+import cn.whaley.materialngaclient.rxjava.SimpleSubscriber;
 import gov.anzong.androidnga.R;
+import gov.anzong.androidnga.activity.SwipeBackAppCompatActivity;
+import okhttp3.Headers;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -48,7 +47,7 @@ import okhttp3.Response;
 import okhttp3.ResponseBody;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
-import rx.Subscriber;
+import retrofit2.converter.scalars.ScalarsConverterFactory;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
@@ -132,6 +131,7 @@ public class LoginActivity extends SwipeBackAppCompatActivity implements Perfere
 
         String postUrl = "http://account.178.com/q_account.php?_act=login&print=login";
 
+
         String userName = PhoneConfiguration.getInstance().userName;
         if (userName != "") {
             userText.setText(userName);
@@ -175,7 +175,7 @@ public class LoginActivity extends SwipeBackAppCompatActivity implements Perfere
 
     private void initViews() {
         setContentView(R.layout.login);
-        toolbar.setTitle(R.string.login);
+        getToolbar().setTitle(R.string.login);
     }
 
 
@@ -185,31 +185,28 @@ public class LoginActivity extends SwipeBackAppCompatActivity implements Perfere
 
         authcodeImg.setImageDrawable(getResources().getDrawable(R.drawable.q_vcode));
 
-        OkHttpClient.Builder clientBuilder = new OkHttpClient.Builder();
+        OkHttpClient.Builder clientBuilder = new OkHttpClient.Builder()
+                .addInterceptor(new Interceptor() {
+                    @Override
+                    public Response intercept(Chain chain) throws IOException {
+                        Request request = chain.request();
+                        Response response = chain.proceed(request);
 
-        clientBuilder.addInterceptor(new Interceptor() {
-            @Override
-            public Response intercept(Chain chain) throws IOException {
-                Request request = chain.request();
-                Response response = chain.proceed(request);
-                if (!response.headers("set-cookie").isEmpty()) {
-                    List<String> cookies = response.headers("set-cookie");
-                    for (String cookie : cookies) {
-                        Logger.t(TAG).d("one cookie: " + cookie);
-                        cookie = cookie.substring(0, cookie.indexOf(';'));
-                        Logger.t(TAG).d("cookie:" + cookie);
-                        if (cookie.indexOf("reg_vcode=") == 0 && cookie.indexOf("deleted") < 0) {
-                            authcodeCookie = cookie.substring(10);
-                            Logger.t(TAG).d("authcodeCookie:" + authcodeCookie);
+                        if (!response.headers("set-cookie").isEmpty()) {
+                            List<String> cookies = response.headers("set-cookie");
+                            for (String cookie : cookies) {
+                                Logger.t(TAG).d("one cookie: " + cookie);
+                                cookie = cookie.substring(0, cookie.indexOf(';'));
+                                Logger.t(TAG).d("cookie:" + cookie);
+                                if (cookie.indexOf("reg_vcode=") == 0 && cookie.indexOf("deleted") < 0) {
+                                    authcodeCookie = cookie.substring(10);
+                                    Logger.t(TAG).d("authcodeCookie:" + authcodeCookie);
+                                }
+                            }
                         }
+                        return response;
                     }
-
-
-                }
-
-                return response;
-            }
-        })
+                })
                 .readTimeout(15000, TimeUnit.MILLISECONDS)
                 .connectTimeout(15000, TimeUnit.MILLISECONDS);
 
@@ -228,12 +225,7 @@ public class LoginActivity extends SwipeBackAppCompatActivity implements Perfere
                 })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Subscriber<Bitmap>() {
-                    @Override
-                    public void onCompleted() {
-                        Logger.t(TAG).d("onComplete");
-                    }
-
+                .subscribe(new SimpleSubscriber<Bitmap>() {
                     @Override
                     public void onError(Throwable e) {
                         Logger.t(TAG).d("on error " + e.toString());
@@ -254,8 +246,6 @@ public class LoginActivity extends SwipeBackAppCompatActivity implements Perfere
         }
         reloadAuthCode();
     }
-
-
 
 
     @Override
@@ -317,19 +307,16 @@ public class LoginActivity extends SwipeBackAppCompatActivity implements Perfere
                         return;
                     }
                     try {
-                        bodyBuffer.append(URLEncoder.encode(userText.getText()
-                                .toString(), "utf-8"));
+                        bodyBuffer.append(URLEncoder.encode(userText.getText().toString(), "utf-8"));
                         bodyBuffer.append("&password=");
-                        bodyBuffer.append(URLEncoder.encode(passwordText
-                                .getText().toString(), "utf-8"));
+                        bodyBuffer.append(URLEncoder.encode(passwordText.getText().toString(), "utf-8"));
                         bodyBuffer.append("&vcode=");
-                        bodyBuffer.append(URLEncoder.encode(authcodeText
-                                .getText().toString(), "utf-8"));
+                        bodyBuffer.append(URLEncoder.encode(authcodeText.getText().toString(), "utf-8"));
                     } catch (UnsupportedEncodingException e) {
                         e.printStackTrace();
                     }
-                    new LoginTask(v).execute(loginUrl, bodyBuffer.toString());
-                    doLogin();
+//                    new LoginTask(v).execute(loginUrl, bodyBuffer.toString());
+                    doLogin(bodyBuffer.toString());
 
                 }
                 loading = true;
@@ -370,9 +357,7 @@ public class LoginActivity extends SwipeBackAppCompatActivity implements Perfere
                 String location = "";
 
                 for (int i = 1; (key = conn.getHeaderFieldKey(i)) != null; i++) {
-                    Log.d(LOG_TAG,
-                            conn.getHeaderFieldKey(i) + ":"
-                                    + conn.getHeaderField(i));
+                    Log.d(LOG_TAG, conn.getHeaderFieldKey(i) + ":" + conn.getHeaderField(i));
                     if (key.equalsIgnoreCase("location")) {
                         String re301location = conn.getHeaderField(i);
                         if (re301location.indexOf("login_failed") > 0) {
@@ -526,8 +511,170 @@ public class LoginActivity extends SwipeBackAppCompatActivity implements Perfere
 
     }
 
-    private void doLogin() {
+    private void doLogin(String postBody) {
+        OkHttpClient.Builder clientBuilder = new OkHttpClient.Builder()
+                .addInterceptor(new Interceptor() {
+                    @Override
+                    public Response intercept(Chain chain) throws IOException {
+                        Request request = chain.request();
+                        Request.Builder requestBuilder = request.newBuilder();
+                        requestBuilder.addHeader("Cookie", "reg_vcode=" + authcodeCookie);
+                        final Response response = chain.proceed(requestBuilder.build());
+
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                validateLoginInfo(response);
+                            }
+                        });
+
+
+                        return response;
+                    }
+                })
+                .addInterceptor(new HttpLogInterceptor())
+                .followRedirects(false)
+                .readTimeout(15000, TimeUnit.MILLISECONDS)
+                .connectTimeout(15000, TimeUnit.MILLISECONDS);
+
+        new Retrofit.Builder()
+                .addConverterFactory(ScalarsConverterFactory.create())
+                .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
+                .baseUrl(Consts.BASE_URL)
+                .client(clientBuilder.build())
+                .build()
+                .create(INgaApi.class)
+                .login(postBody)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new SimpleSubscriber<ResponseBody>() {
+                    @Override
+                    public void onNext(ResponseBody response) {
+                        Logger.t(TAG).d("Response body: " + response.toString());
+
+                    }
+                });
+    }
+
+    private void validateLoginInfo(Response response) {
+        String key, value;
+        Headers headers = response.headers();
+        String cid = "", uid = "";
+        for (int i = 0; i < headers.size(); i++) {
+            key = headers.name(i);
+            value = headers.value(i);
+//            Logger.t(TAG).d(key + " : " + value);
+            if (key.equalsIgnoreCase("location")) {
+                String re301location = value;
+                if (re301location.indexOf("login_failed") > 0) {
+                    if (re301location.indexOf("error_vcode") > 0) {
+                        showToast(R.string.vcode_error);
+                    } else if (re301location.indexOf("e_login") > 0) {
+                        showToast(R.string.user_name_pwd_error);
+                    } else {
+                        showToast(R.string.unknown_error);
+                    }
+                    return;
+                }
+            }
+            if (key.equalsIgnoreCase("set-cookie")) {
+                String cookieVal = value;
+                cookieVal = cookieVal.substring(0, cookieVal.indexOf(';'));
+                if (cookieVal.indexOf("_sid=") == 0) {
+                    cid = cookieVal.substring(5);
+                }
+                if (cookieVal.indexOf("_178c=") == 0) {
+                    uid = cookieVal.substring(6, cookieVal.indexOf('%'));
+                    if (StringUtil.isEmail(name)) {
+                        try {
+                            String nametmp = cookieVal.substring(cookieVal.indexOf("%23") + 3);
+                            nametmp = URLDecoder.decode(nametmp, "utf-8");
+                            String[] stemp = nametmp.split("#");
+                            for (int ia = 0; ia < stemp.length; ia++) {
+                                if (!StringUtil.isEmail(stemp[ia])) {
+                                    name = stemp[ia];
+                                    ia = stemp.length;
+                                }
+                            }
+                        } catch (UnsupportedEncodingException e) {
+                        }
+                    }
+                }
+
+                showToast(R.string.login_successfully);
+                SharedPreferences share = getSharedPreferences(PERFERENCE, MODE_MULTI_PROCESS);
+                Editor editor = share.edit().putString(UID, uid)
+                        .putString(CID, cid).putString(PENDING_REPLYS, "")
+                        .putString(REPLYTOTALNUM, "0")
+                        .putString(USER_NAME, name)
+                        .putString(BLACK_LIST, "");
+                editor.apply();
+                MyApp app = (MyApp) getApplication();
+                app.addToUserList(uid, cid, name, "", 0, "");
+
+                PhoneConfiguration.getInstance().setUid(uid);
+                PhoneConfiguration.getInstance().setCid(cid);
+                PhoneConfiguration.getInstance().userName = name;
+                PhoneConfiguration.getInstance().setReplyTotalNum(0);
+                PhoneConfiguration.getInstance().setReplyString("");
+                PhoneConfiguration.getInstance().blacklist = StringUtil
+                        .blackliststringtolisttohashset("");
+                alreadylogin = true;
+                Intent intent = new Intent();
+                if (needtopost) {
+                    if (StringUtil.isEmpty(to)) {
+                        if (action.equals("search")) {
+                            intent.putExtra("fid", fid);
+                            intent.putExtra("searchmode", "true");
+                            intent.setClass(this, PhoneConfiguration.getInstance().topicActivityClass);
+                            startActivity(intent);
+                        } else {
+                            if (action.equals("new")) {
+                                intent.putExtra("fid", fid);
+                                intent.putExtra("action", "new");
+                            } else if (action.equals("reply")) {
+                                intent.putExtra("prefix", "");
+                                intent.putExtra("tid", tid);
+                                intent.putExtra("action", "reply");
+                            } else if (action.equals("modify")) {
+                                intent.putExtra("prefix", prefix);
+                                intent.putExtra("tid", tid);
+                                intent.putExtra("pid", pid);
+                                intent.putExtra("title", title);
+                                intent.putExtra("action", "modify");
+                            }
+                            intent.setClass(this, PhoneConfiguration.getInstance().postActivityClass);
+                            startActivity(intent);
+                        }
+                    } else {
+                        if (to.equals(name)) {
+                            showToast(R.string.not_to_send_to_self);
+                            finish();
+                        } else {
+                            if (action.equals("new")) {
+                                intent.putExtra("to", to);
+                                intent.putExtra("action", "new");
+                            } else if (action.equals("reply")) {
+                                intent.putExtra("mid", mid);
+                                intent.putExtra("title", title);
+                                intent.putExtra("to", to);
+                                intent.putExtra("action", "reply");
+                            }
+                            intent.setClass(this, PhoneConfiguration.getInstance().messagePostActivityClass);
+                            startActivity(intent);
+                        }
+                    }
+                } else {
+                    intent.setClass(this, MainActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    startActivity(intent);
+                }
+
+            }
+
+        }
 
     }
+
 
 }

@@ -57,14 +57,15 @@ public class HttpPostClient {
 
             URL url = new URL(this.urlString);
             conn = (HttpURLConnection) url.openConnection();
+            Log.d(LOG_TAG, "Cookie: " + cookie + " postbody: " + String.valueOf(body.length()) + " body: " + body);
             if (cookie != null)
                 conn.setRequestProperty("Cookie", cookie);
             conn.setInstanceFollowRedirects(false);
 
-            conn.setRequestProperty("User-Agent", USER_AGENT);
+//            conn.setRequestProperty("User-Agent", USER_AGENT);
             conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-            conn.setRequestProperty("Content-Length", String.valueOf(body.length()));
-            conn.setRequestProperty("Accept-Charset", "GBK");
+//            conn.setRequestProperty("Content-Length", String.valueOf(body.length()));
+//            conn.setRequestProperty("Accept-Charset", "GBK");
             conn.setRequestMethod("POST");
             conn.setDoOutput(true);
 
