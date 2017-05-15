@@ -43,14 +43,14 @@ public class UploadCookieCollector {
 
     public UploadCookieCollector StartCollect() {
         final PhoneConfiguration config = PhoneConfiguration.getInstance();
-        /*String data = "func=login&uid=" + config .getUid()+" &cid=" + config.getCid()
+        /*String data = "func=activity_login&uid=" + config .getUid()+" &cid=" + config.getCid()
 				+"&expires=31536000&do_not_multi_login=1";
 		HttpPostClient c =  new HttpPostClient(collectURL);
 		String cookie = config.getCookie();
 		c.setCookie(cookie);
 		
 		HttpURLConnection conn  = c.post_body(data);*/
-        final String urlString = collectURL + "?func=login&uid=" + config.getUid()
+        final String urlString = collectURL + "?func=activity_login&uid=" + config.getUid()
                 + "&cid=" + config.getCid() + "&expires=31536000";
         //URL=http://bbs.ngacn.cc/nuke.php?func=login&uid=553736&cid=ca583128fd6a500fcee2ff9d5f6c656fffade423&expires=31536000
 

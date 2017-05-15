@@ -8,6 +8,8 @@ import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.support.design.widget.TextInputEditText;
+import android.support.design.widget.TextInputLayout;
 import android.text.TextUtils;
 import android.view.Menu;
 
@@ -58,7 +60,7 @@ import sp.phone.utils.ThemeManager;
 public class LoginActivity extends SwipeBackAppCompatActivity implements PerferenceConstant {
     private static final String TAG = LoginActivity.class.getSimpleName();
 
-    String name;
+    private String name;
 
 
     private String action, messagemode;
@@ -76,7 +78,6 @@ public class LoginActivity extends SwipeBackAppCompatActivity implements Perfere
     public static void launch(Activity activity) {
         Intent intent = new Intent(activity, LoginActivity.class);
         activity.startActivity(intent);
-        activity.overridePendingTransition(R.anim.zoom_enter, R.anim.zoom_exit);
     }
 
     @BindView(R.id.login_button)
@@ -89,13 +90,17 @@ public class LoginActivity extends SwipeBackAppCompatActivity implements Perfere
     ImageButton authcodeimgRefresh;
 
     @BindView(R.id.login_user_edittext)
-    EditText userText;
+    TextInputEditText userText;
 
     @BindView(R.id.login_password_edittext)
-    EditText passwordText;
+    TextInputEditText passwordText;
 
     @BindView(R.id.login_authcode_edittext)
-    EditText authcodeText;
+    TextInputEditText authcodeText;
+
+    @BindView(R.id.login_authcode_layout)
+    TextInputLayout authCodeLayout;
+
 
     @BindView(R.id.user_list)
     ListView userList;
@@ -148,7 +153,7 @@ public class LoginActivity extends SwipeBackAppCompatActivity implements Perfere
         } else {
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
         }
-        ThemeManager.SetContextTheme(this);
+//        ThemeManager.SetContextTheme(this);
 
         initViews();
 
@@ -194,7 +199,7 @@ public class LoginActivity extends SwipeBackAppCompatActivity implements Perfere
     }
 
     private void initViews() {
-        setContentView(R.layout.login);
+        setContentView(R.layout.activity_login);
         getToolbar().setTitle(R.string.login);
     }
 
@@ -215,9 +220,9 @@ public class LoginActivity extends SwipeBackAppCompatActivity implements Perfere
                         if (!response.headers("set-cookie").isEmpty()) {
                             List<String> cookies = response.headers("set-cookie");
                             for (String cookie : cookies) {
-                                Logger.t(TAG).d("one cookie: " + cookie);
+//                                Logger.t(TAG).d("one cookie: " + cookie);
                                 cookie = cookie.substring(0, cookie.indexOf(';'));
-                                Logger.t(TAG).d("cookie:" + cookie);
+//                                Logger.t(TAG).d("cookie:" + cookie);
                                 if (cookie.indexOf("reg_vcode=") == 0 && cookie.indexOf("deleted") < 0) {
                                     authcodeCookie = cookie.substring(10);
                                     Logger.t(TAG).d("authcodeCookie:" + authcodeCookie);
@@ -329,7 +334,7 @@ public class LoginActivity extends SwipeBackAppCompatActivity implements Perfere
                 .subscribe(new SimpleSubscriber<ResponseBody>() {
                     @Override
                     public void onNext(ResponseBody response) {
-                        Logger.t(TAG).d("Response body: " + response.toString());
+//                        Logger.t(TAG).d("Response body: " + response.toString());
 
                     }
                 });
@@ -347,9 +352,9 @@ public class LoginActivity extends SwipeBackAppCompatActivity implements Perfere
                 String re301location = value;
                 if (re301location.indexOf("login_failed") > 0) {
                     if (re301location.indexOf("error_vcode") > 0) {
-                        showToast(R.string.vcode_error);
+                        authcodeText.setError(getString(R.string.vcode_error));
                     } else if (re301location.indexOf("e_login") > 0) {
-                        showToast(R.string.user_name_pwd_error);
+                        passwordText.setError(getString(R.string.user_name_pwd_error));
                     } else {
                         showToast(R.string.unknown_error);
                     }

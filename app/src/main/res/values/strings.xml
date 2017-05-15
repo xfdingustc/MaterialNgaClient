@@ -15,6 +15,8 @@
     <string name="authcodewithmaohao">验证码:</string>
     <string name="login">登录</string>
     <string name="submit">提交</string>
+    <string name="input_pwd">输入密码</string>
+    <string name="input_vcode">输入下方验证码</string>
     <string name="selectpic">选择图片</string>
     <string name="login_successfully">登录成功</string>
     <string name="login_failed">登录失败</string>

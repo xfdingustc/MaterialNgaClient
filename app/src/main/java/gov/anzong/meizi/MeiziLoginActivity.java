@@ -74,7 +74,7 @@ public class MeiziLoginActivity extends SwipeBackAppCompatActivity implements
 
         login_state = (TextView) findViewById(R.id.login_state);
 
-        String postUrl = "http://www.dbmeizi.com/ajax/login";
+        String postUrl = "http://www.dbmeizi.com/ajax/activity_login";
 
         LoginButtonListener listener = new LoginButtonListener(postUrl);
         button_login.setOnClickListener(listener);
