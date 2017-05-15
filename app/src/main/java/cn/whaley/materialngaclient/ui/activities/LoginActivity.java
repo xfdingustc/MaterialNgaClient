@@ -7,12 +7,10 @@ import android.content.SharedPreferences.Editor;
 import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
+import android.text.TextUtils;
 import android.view.Menu;
-import android.view.View;
-import android.view.View.OnClickListener;
+
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
@@ -25,7 +23,6 @@ import com.orhanobut.logger.Logger;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.List;
@@ -53,7 +50,6 @@ import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 import sp.phone.adapter.UserListAdapter;
 import sp.phone.bean.PerferenceConstant;
-import sp.phone.forumoperation.HttpPostClient;
 import sp.phone.utils.PhoneConfiguration;
 import sp.phone.utils.ReflectionUtil;
 import sp.phone.utils.StringUtil;
@@ -62,7 +58,6 @@ import sp.phone.utils.ThemeManager;
 public class LoginActivity extends SwipeBackAppCompatActivity implements PerferenceConstant {
     private static final String TAG = LoginActivity.class.getSimpleName();
 
-    Object commit_lock = new Object();
     String name;
 
 
@@ -76,7 +71,7 @@ public class LoginActivity extends SwipeBackAppCompatActivity implements Perfere
     private int mid;
     private boolean alreadylogin = false;
     private String authcodeCookie;
-    private boolean loading = false;
+
 
     public static void launch(Activity activity) {
         Intent intent = new Intent(activity, LoginActivity.class);
@@ -110,6 +105,37 @@ public class LoginActivity extends SwipeBackAppCompatActivity implements Perfere
         reloadAuthCode();
     }
 
+    @OnClick(R.id.login_button)
+    public void onBtnLoginClicked() {
+        StringBuffer bodyBuffer = new StringBuffer();
+        bodyBuffer.append("email=");
+        if (StringUtil.isEmpty(authcodeCookie)) {
+            showToast("验证码信息错误，请重试");
+            reloadAuthCode();
+            return;
+        }
+        name = userText.getText().toString();
+        if (StringUtil.isEmpty(name) ||
+                StringUtil.isEmpty(passwordText.getText().toString()) ||
+                StringUtil.isEmpty(authcodeText.getText().toString())) {
+            showToast("内容缺少，请检查后再试");
+            reloadAuthCode();
+            return;
+        }
+        try {
+            bodyBuffer.append(URLEncoder.encode(userText.getText().toString(), "utf-8"));
+            bodyBuffer.append("&password=");
+            bodyBuffer.append(URLEncoder.encode(passwordText.getText().toString(), "utf-8"));
+            bodyBuffer.append("&vcode=");
+            bodyBuffer.append(URLEncoder.encode(authcodeText.getText().toString(), "utf-8"));
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        doLogin(bodyBuffer.toString());
+
+    }
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         // requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -129,17 +155,12 @@ public class LoginActivity extends SwipeBackAppCompatActivity implements Perfere
         userList.setAdapter(new UserListAdapter(this, userText));
 
 
-        String postUrl = "http://account.178.com/q_account.php?_act=login&print=login";
-
-
         String userName = PhoneConfiguration.getInstance().userName;
         if (userName != "") {
             userText.setText(userName);
             userText.selectAll();
         }
 
-        LoginButtonListener listener = new LoginButtonListener(postUrl);
-        buttonLogin.setOnClickListener(listener);
 
         Intent intent = this.getIntent();
         action = intent.getStringExtra("action");
@@ -151,8 +172,7 @@ public class LoginActivity extends SwipeBackAppCompatActivity implements Perfere
                 needtopost = true;
             }
             if (StringUtil.isEmpty(messagemode)) {
-                if (action.equals("new") || action.equals("reply")
-                        || action.equals("modify")) {
+                if (action.equals("new") || action.equals("reply") || action.equals("modify")) {
                     needtopost = true;
                     prefix = intent.getStringExtra("prefix");
                     tid = intent.getStringExtra("tid");
@@ -240,13 +260,6 @@ public class LoginActivity extends SwipeBackAppCompatActivity implements Perfere
 
     }
 
-    private void reloadAuthCode(String error) {
-        if (!StringUtil.isEmpty(error)) {
-            showToast(error);
-        }
-        reloadAuthCode();
-    }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -274,242 +287,6 @@ public class LoginActivity extends SwipeBackAppCompatActivity implements Perfere
         authcodeText.setSelected(true);
     }
 
-    class LoginButtonListener implements OnClickListener {
-        final private String loginUrl;
-        private final String LOG_TAG = LoginButtonListener.class
-                .getSimpleName();
-
-        public LoginButtonListener(String loginUrl) {
-            super();
-            this.loginUrl = loginUrl;
-        }
-
-        @Override
-        public void onClick(View v) {
-            synchronized (commit_lock) {
-                if (loading == true) {
-                    showToast(R.string.avoidWindfury);
-                    return;
-                } else {
-                    StringBuffer bodyBuffer = new StringBuffer();
-                    bodyBuffer.append("email=");
-                    if (StringUtil.isEmpty(authcodeCookie)) {
-                        showToast("验证码信息错误，请重试");
-                        reloadAuthCode();
-                        return;
-                    }
-                    name = userText.getText().toString();
-                    if (StringUtil.isEmpty(name) ||
-                            StringUtil.isEmpty(passwordText.getText().toString()) ||
-                            StringUtil.isEmpty(authcodeText.getText().toString())) {
-                        showToast("内容缺少，请检查后再试");
-                        reloadAuthCode();
-                        return;
-                    }
-                    try {
-                        bodyBuffer.append(URLEncoder.encode(userText.getText().toString(), "utf-8"));
-                        bodyBuffer.append("&password=");
-                        bodyBuffer.append(URLEncoder.encode(passwordText.getText().toString(), "utf-8"));
-                        bodyBuffer.append("&vcode=");
-                        bodyBuffer.append(URLEncoder.encode(authcodeText.getText().toString(), "utf-8"));
-                    } catch (UnsupportedEncodingException e) {
-                        e.printStackTrace();
-                    }
-//                    new LoginTask(v).execute(loginUrl, bodyBuffer.toString());
-                    doLogin(bodyBuffer.toString());
-
-                }
-                loading = true;
-            }
-
-        }
-
-        private class LoginTask extends AsyncTask<String, Integer, Boolean> {
-            final View v;
-            private String uid = null;
-            private String cid = null;
-            private String errorstr = "";
-
-            public LoginTask(View v) {
-                super();
-                this.v = v;
-            }
-
-            @Override
-            protected Boolean doInBackground(String... params) {
-                String url = params[0];
-                String body = params[1];
-                String cookie = "reg_vcode=" + authcodeCookie;
-                HttpURLConnection conn = new HttpPostClient(url, cookie).post_body(body);
-                return validate(conn);
-
-            }
-
-            private boolean validate(HttpURLConnection conn) {
-                if (conn == null)
-                    return false;
-
-                String cookieVal = null;
-                String key = null;
-
-                String uid = "";
-                String cid = "";
-                String location = "";
-
-                for (int i = 1; (key = conn.getHeaderFieldKey(i)) != null; i++) {
-                    Log.d(LOG_TAG, conn.getHeaderFieldKey(i) + ":" + conn.getHeaderField(i));
-                    if (key.equalsIgnoreCase("location")) {
-                        String re301location = conn.getHeaderField(i);
-                        if (re301location.indexOf("login_failed") > 0) {
-                            if (re301location.indexOf("error_vcode") > 0) {
-                                errorstr = ("验证码错误");
-                            }
-                            if (re301location.indexOf("e_login") > 0) {
-                                errorstr = ("用户名或密码错误");
-                            }
-                            errorstr = "未知错误";
-                            return false;
-                        }
-                    }
-                    if (key.equalsIgnoreCase("set-cookie")) {
-                        cookieVal = conn.getHeaderField(i);
-                        cookieVal = cookieVal.substring(0,
-                                cookieVal.indexOf(';'));
-                        if (cookieVal.indexOf("_sid=") == 0)
-                            cid = cookieVal.substring(5);
-                        if (cookieVal.indexOf("_178c=") == 0) {
-                            uid = cookieVal.substring(6, cookieVal.indexOf('%'));
-                            if (StringUtil.isEmail(name)) {
-                                try {
-                                    String nametmp = cookieVal
-                                            .substring(cookieVal.indexOf("%23") + 3);
-                                    nametmp = URLDecoder.decode(nametmp,
-                                            "utf-8");
-                                    String[] stemp = nametmp.split("#");
-                                    for (int ia = 0; ia < stemp.length; ia++) {
-                                        if (!StringUtil.isEmail(stemp[ia])) {
-                                            name = stemp[ia];
-                                            ia = stemp.length;
-                                        }
-                                    }
-                                } catch (UnsupportedEncodingException e) {
-                                }
-                            }
-                        }
-
-                    }
-                    if (key.equalsIgnoreCase("Location")) {
-                        location = conn.getHeaderField(i);
-
-                    }
-                }
-                if (cid != "" && uid != ""
-                        && location.indexOf("login_success&error=0") != -1) {
-                    this.uid = uid;
-                    this.cid = cid;
-                    Log.i(LOG_TAG, "uid =" + uid + ",csid=" + cid);
-                    return true;
-                }
-
-                return false;
-            }
-
-            @Override
-            protected void onPostExecute(Boolean result) {
-                synchronized (commit_lock) {
-                    loading = false;
-                }
-                if (!StringUtil.isEmpty(errorstr)) {
-                    reloadAuthCode(errorstr);
-                    super.onPostExecute(result);
-                } else {
-                    if (result.booleanValue()) {
-                        showToast(R.string.login_successfully);
-                        SharedPreferences share = LoginActivity.this
-                                .getSharedPreferences(PERFERENCE,
-                                        MODE_MULTI_PROCESS);
-                        Editor editor = share.edit().putString(UID, uid)
-                                .putString(CID, cid).putString(PENDING_REPLYS, "")
-                                .putString(REPLYTOTALNUM, "0")
-                                .putString(USER_NAME, name)
-                                .putString(BLACK_LIST, "");
-                        editor.apply();
-                        MyApp app = (MyApp) LoginActivity.this.getApplication();
-                        app.addToUserList(uid, cid, name, "", 0, "");
-
-                        PhoneConfiguration.getInstance().setUid(uid);
-                        PhoneConfiguration.getInstance().setCid(cid);
-                        PhoneConfiguration.getInstance().userName = name;
-                        PhoneConfiguration.getInstance().setReplyTotalNum(0);
-                        PhoneConfiguration.getInstance().setReplyString("");
-                        PhoneConfiguration.getInstance().blacklist = StringUtil
-                                .blackliststringtolisttohashset("");
-                        alreadylogin = true;
-                        Intent intent = new Intent();
-                        if (needtopost) {
-                            if (StringUtil.isEmpty(to)) {
-                                if (action.equals("search")) {
-                                    intent.putExtra("fid", fid);
-                                    intent.putExtra("searchmode", "true");
-                                    intent.setClass(
-                                            v.getContext(),
-                                            PhoneConfiguration.getInstance().topicActivityClass);
-                                    startActivity(intent);
-                                } else {
-                                    if (action.equals("new")) {
-                                        intent.putExtra("fid", fid);
-                                        intent.putExtra("action", "new");
-                                    } else if (action.equals("reply")) {
-                                        intent.putExtra("prefix", "");
-                                        intent.putExtra("tid", tid);
-                                        intent.putExtra("action", "reply");
-                                    } else if (action.equals("modify")) {
-                                        intent.putExtra("prefix", prefix);
-                                        intent.putExtra("tid", tid);
-                                        intent.putExtra("pid", pid);
-                                        intent.putExtra("title", title);
-                                        intent.putExtra("action", "modify");
-                                    }
-                                    intent.setClass(
-                                            v.getContext(),
-                                            PhoneConfiguration.getInstance().postActivityClass);
-                                    startActivity(intent);
-                                }
-                            } else {
-                                if (to.equals(name)) {
-                                    showToast(R.string.not_to_send_to_self);
-                                    finish();
-                                } else {
-                                    if (action.equals("new")) {
-                                        intent.putExtra("to", to);
-                                        intent.putExtra("action", "new");
-                                    } else if (action.equals("reply")) {
-                                        intent.putExtra("mid", mid);
-                                        intent.putExtra("title", title);
-                                        intent.putExtra("to", to);
-                                        intent.putExtra("action", "reply");
-                                    }
-                                    intent.setClass(
-                                            v.getContext(),
-                                            PhoneConfiguration.getInstance().messagePostActivityClass);
-                                    startActivity(intent);
-                                }
-                            }
-                        } else {
-                            intent.setClass(v.getContext(), MainActivity.class);
-                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                            startActivity(intent);
-                        }
-                        super.onPostExecute(result);
-                    } else {
-                        showToast(R.string.login_failed);
-                    }
-                }
-            }
-
-        }
-
-    }
 
     private void doLogin(String postBody) {
         OkHttpClient.Builder clientBuilder = new OkHttpClient.Builder()
@@ -524,7 +301,9 @@ public class LoginActivity extends SwipeBackAppCompatActivity implements Perfere
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                validateLoginInfo(response);
+                                if (!validateLoginInfo(response)) {
+                                    reloadAuthCode();
+                                }
                             }
                         });
 
@@ -556,14 +335,14 @@ public class LoginActivity extends SwipeBackAppCompatActivity implements Perfere
                 });
     }
 
-    private void validateLoginInfo(Response response) {
+    private boolean validateLoginInfo(Response response) {
         String key, value;
         Headers headers = response.headers();
         String cid = "", uid = "";
         for (int i = 0; i < headers.size(); i++) {
             key = headers.name(i);
             value = headers.value(i);
-//            Logger.t(TAG).d(key + " : " + value);
+            Logger.t(TAG).d(key + " : " + value);
             if (key.equalsIgnoreCase("location")) {
                 String re301location = value;
                 if (re301location.indexOf("login_failed") > 0) {
@@ -574,7 +353,7 @@ public class LoginActivity extends SwipeBackAppCompatActivity implements Perfere
                     } else {
                         showToast(R.string.unknown_error);
                     }
-                    return;
+                    return false;
                 }
             }
             if (key.equalsIgnoreCase("set-cookie")) {
@@ -601,79 +380,88 @@ public class LoginActivity extends SwipeBackAppCompatActivity implements Perfere
                     }
                 }
 
-                showToast(R.string.login_successfully);
-                SharedPreferences share = getSharedPreferences(PERFERENCE, MODE_MULTI_PROCESS);
-                Editor editor = share.edit().putString(UID, uid)
-                        .putString(CID, cid).putString(PENDING_REPLYS, "")
-                        .putString(REPLYTOTALNUM, "0")
-                        .putString(USER_NAME, name)
-                        .putString(BLACK_LIST, "");
-                editor.apply();
-                MyApp app = (MyApp) getApplication();
-                app.addToUserList(uid, cid, name, "", 0, "");
-
-                PhoneConfiguration.getInstance().setUid(uid);
-                PhoneConfiguration.getInstance().setCid(cid);
-                PhoneConfiguration.getInstance().userName = name;
-                PhoneConfiguration.getInstance().setReplyTotalNum(0);
-                PhoneConfiguration.getInstance().setReplyString("");
-                PhoneConfiguration.getInstance().blacklist = StringUtil
-                        .blackliststringtolisttohashset("");
-                alreadylogin = true;
-                Intent intent = new Intent();
-                if (needtopost) {
-                    if (StringUtil.isEmpty(to)) {
-                        if (action.equals("search")) {
-                            intent.putExtra("fid", fid);
-                            intent.putExtra("searchmode", "true");
-                            intent.setClass(this, PhoneConfiguration.getInstance().topicActivityClass);
-                            startActivity(intent);
-                        } else {
-                            if (action.equals("new")) {
-                                intent.putExtra("fid", fid);
-                                intent.putExtra("action", "new");
-                            } else if (action.equals("reply")) {
-                                intent.putExtra("prefix", "");
-                                intent.putExtra("tid", tid);
-                                intent.putExtra("action", "reply");
-                            } else if (action.equals("modify")) {
-                                intent.putExtra("prefix", prefix);
-                                intent.putExtra("tid", tid);
-                                intent.putExtra("pid", pid);
-                                intent.putExtra("title", title);
-                                intent.putExtra("action", "modify");
-                            }
-                            intent.setClass(this, PhoneConfiguration.getInstance().postActivityClass);
-                            startActivity(intent);
-                        }
-                    } else {
-                        if (to.equals(name)) {
-                            showToast(R.string.not_to_send_to_self);
-                            finish();
-                        } else {
-                            if (action.equals("new")) {
-                                intent.putExtra("to", to);
-                                intent.putExtra("action", "new");
-                            } else if (action.equals("reply")) {
-                                intent.putExtra("mid", mid);
-                                intent.putExtra("title", title);
-                                intent.putExtra("to", to);
-                                intent.putExtra("action", "reply");
-                            }
-                            intent.setClass(this, PhoneConfiguration.getInstance().messagePostActivityClass);
-                            startActivity(intent);
-                        }
-                    }
-                } else {
-                    intent.setClass(this, MainActivity.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                    startActivity(intent);
+                if (!TextUtils.isEmpty(uid) && !TextUtils.isEmpty(cid)) {
+                    saveCookie(uid, cid);
+                    return true;
                 }
 
             }
 
         }
 
+        return false;
+
+    }
+
+    private void saveCookie(String uid, String cid) {
+        showToast(R.string.login_successfully);
+        SharedPreferences share = getSharedPreferences(PERFERENCE, MODE_MULTI_PROCESS);
+        Editor editor = share.edit().putString(UID, uid)
+                .putString(CID, cid).putString(PENDING_REPLYS, "")
+                .putString(REPLYTOTALNUM, "0")
+                .putString(USER_NAME, name)
+                .putString(BLACK_LIST, "");
+        editor.apply();
+        MyApp app = (MyApp) getApplication();
+        app.addToUserList(uid, cid, name, "", 0, "");
+
+        PhoneConfiguration.getInstance().setUid(uid);
+        PhoneConfiguration.getInstance().setCid(cid);
+        PhoneConfiguration.getInstance().userName = name;
+        PhoneConfiguration.getInstance().setReplyTotalNum(0);
+        PhoneConfiguration.getInstance().setReplyString("");
+        PhoneConfiguration.getInstance().blacklist = StringUtil
+                .blackliststringtolisttohashset("");
+        alreadylogin = true;
+        Intent intent = new Intent();
+        if (needtopost) {
+            if (StringUtil.isEmpty(to)) {
+                if (action.equals("search")) {
+                    intent.putExtra("fid", fid);
+                    intent.putExtra("searchmode", "true");
+                    intent.setClass(this, PhoneConfiguration.getInstance().topicActivityClass);
+                    startActivity(intent);
+                } else {
+                    if (action.equals("new")) {
+                        intent.putExtra("fid", fid);
+                        intent.putExtra("action", "new");
+                    } else if (action.equals("reply")) {
+                        intent.putExtra("prefix", "");
+                        intent.putExtra("tid", tid);
+                        intent.putExtra("action", "reply");
+                    } else if (action.equals("modify")) {
+                        intent.putExtra("prefix", prefix);
+                        intent.putExtra("tid", tid);
+                        intent.putExtra("pid", pid);
+                        intent.putExtra("title", title);
+                        intent.putExtra("action", "modify");
+                    }
+                    intent.setClass(this, PhoneConfiguration.getInstance().postActivityClass);
+                    startActivity(intent);
+                }
+            } else {
+                if (to.equals(name)) {
+                    showToast(R.string.not_to_send_to_self);
+                    finish();
+                } else {
+                    if (action.equals("new")) {
+                        intent.putExtra("to", to);
+                        intent.putExtra("action", "new");
+                    } else if (action.equals("reply")) {
+                        intent.putExtra("mid", mid);
+                        intent.putExtra("title", title);
+                        intent.putExtra("to", to);
+                        intent.putExtra("action", "reply");
+                    }
+                    intent.setClass(this, PhoneConfiguration.getInstance().messagePostActivityClass);
+                    startActivity(intent);
+                }
+            }
+        } else {
+            intent.setClass(this, MainActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(intent);
+        }
     }
 
 
