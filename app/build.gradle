@@ -9,6 +9,7 @@ android {
         targetSdkVersion 25
         versionCode 1
         versionName "1.0"
+        multiDexEnabled true
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -32,8 +33,8 @@ dependencies {
     compile(name: 'ActionBar-PullToRefresh-Library', ext: 'aar')
     compile(name: 'ActionBar-PullToRefresh', ext: 'aar')
     compile(name: 'SwipeBackLayoutLibrary', ext: 'aar')
-    compile "com.android.support:support-v4:$Version_AndroidSupport"
-    compile "com.android.support:design:$Version_AndroidSupport"
+    compile 'com.android.support:support-v4:25.3.1'
+    compile 'com.android.support:design:25.3.1'
     compile 'com.alibaba:fastjson:1.2.31'
     compile 'commons-io:commons-io:2.5'
     compile 'com.github.bumptech.glide:glide:3.7.0'
@@ -47,6 +48,7 @@ dependencies {
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
+    androidTestCompile 'com.google.code.findbugs:jsr305:3.0.1'
     compile 'com.android.support:appcompat-v7:25.3.1'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
     testCompile 'junit:junit:4.12'
@@ -58,4 +60,11 @@ dependencies {
     compile 'com.orhanobut:logger:1.15'
     compile 'com.squareup.retrofit2:converter-scalars:2.2.0'
     compile 'com.lhalcyon:okhttp-logger-interceptor:1.0.2'
+    compile 'com.google.dagger:dagger:2.10'
+    annotationProcessor 'com.google.dagger:dagger-compiler:2.10'
+    compile 'com.trello:rxlifecycle:1.0'
+    compile 'com.trello:rxlifecycle-components:1.0'
+    compile 'com.jakewharton.timber:timber:4.5.1'
+    compile 'com.github.frankiesardo:auto-parcel:0.3.1'
+    compile 'com.github.frankiesardo:auto-parcel-processor:0.3.1'
 }

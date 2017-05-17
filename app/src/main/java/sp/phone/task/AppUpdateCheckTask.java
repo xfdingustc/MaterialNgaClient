@@ -18,8 +18,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 
+import cn.whaley.materialngaclient.app.MdNgaApplication;
 import gov.anzong.androidnga.R;
-import cn.whaley.materialngaclient.app.MyApp;
 import sp.phone.utils.HttpUtil;
 import sp.phone.utils.PhoneConfiguration;
 import sp.phone.utils.StringUtil;
@@ -138,7 +138,7 @@ public class AppUpdateCheckTask extends AsyncTask<String, Integer, String> {
         int id = 0;
         id = Integer.parseInt(result);
 
-        if (id <= MyApp.version) {
+        if (id <= MdNgaApplication.version) {
             Log.i(TAG, "application alread up to date");
             return;
         }

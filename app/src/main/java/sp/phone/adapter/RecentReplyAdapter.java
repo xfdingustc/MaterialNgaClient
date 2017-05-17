@@ -20,8 +20,8 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import cn.whaley.materialngaclient.app.MdNgaApplication;
 import gov.anzong.androidnga.R;
-import cn.whaley.materialngaclient.app.MyApp;
 import sp.phone.bean.NotificationObject;
 import sp.phone.bean.PerferenceConstant;
 import sp.phone.bean.User;
@@ -137,7 +137,7 @@ public class RecentReplyAdapter extends BaseAdapter implements
             for (User u : userList) {
                 if (u.getUserId().equals(
                         PhoneConfiguration.getInstance().uid)) {
-                    MyApp app = (MyApp) ((Activity) mcontext)
+                    MdNgaApplication app = (MdNgaApplication) ((Activity) mcontext)
                             .getApplication();
                     app.addToUserList(u.getUserId(), u.getCid(),
                             u.getNickName(), str, list.size(), u.getBlackList());

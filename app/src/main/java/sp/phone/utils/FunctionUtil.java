@@ -59,8 +59,8 @@ import android.widget.Toast;
 import java.lang.reflect.Field;
 import java.util.HashSet;
 
+import cn.whaley.materialngaclient.app.MdNgaApplication;
 import gov.anzong.androidnga.R;
-import cn.whaley.materialngaclient.app.MyApp;
 import gov.anzong.androidnga.util.NetUtil;
 import noname.gson.parse.NonameReadBody;
 import sp.phone.adapter.NonameArticleListAdapter;
@@ -209,7 +209,7 @@ public class FunctionUtil {
             });
         }
         WebSettings setting = contentTV.getSettings();
-        setting.setUserAgentString(context.getString(R.string.clientua) + ((MyApp) ((Activity) context).getApplication()).version);
+        setting.setUserAgentString(context.getString(R.string.clientua) + ((MdNgaApplication) ((Activity) context).getApplication()).version);
         setting.setDefaultFontSize(PhoneConfiguration.getInstance()
                 .getWebSize());
         setting.setJavaScriptEnabled(false);
@@ -234,7 +234,7 @@ public class FunctionUtil {
 
 
         WebSettings setting = contentTV.getSettings();
-        setting.setUserAgentString(context.getString(R.string.clientua) + ((MyApp) ((Activity) context).getApplication()).version);
+        setting.setUserAgentString(context.getString(R.string.clientua) + ((MdNgaApplication) ((Activity) context).getApplication()).version);
         setting.setDefaultFontSize(PhoneConfiguration.getInstance()
                 .getWebSize());
         setting.setJavaScriptEnabled(false);
@@ -269,7 +269,7 @@ public class FunctionUtil {
 //			contentTV.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
 //		}
         WebSettings setting = contentTV.getSettings();
-        setting.setUserAgentString(context.getString(R.string.clientua) + ((MyApp) ((Activity) context).getApplication()).version);
+        setting.setUserAgentString(context.getString(R.string.clientua) + ((MdNgaApplication) ((Activity) context).getApplication()).version);
         setting.setDefaultFontSize(PhoneConfiguration.getInstance().getWebSize());
         setting.setJavaScriptEnabled(false);
         contentTV.setWebViewClient(client);

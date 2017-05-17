@@ -25,7 +25,7 @@ import android.widget.FrameLayout;
 import android.widget.HeaderViewListAdapter;
 import android.widget.ListView;
 
-import cn.whaley.materialngaclient.app.MyApp;
+import cn.whaley.materialngaclient.app.MdNgaApplication;
 import gov.anzong.androidnga.R;
 import sp.phone.adapter.ActionBarUserListAdapter;
 import sp.phone.adapter.MessageListAdapter;
@@ -141,7 +141,7 @@ public class FlexibleMessageListActivity extends SwipeBackAppCompatActivity
             public boolean onNavigationItemSelected(int itemPosition,
                                                     long itemId) {
                 User u = (User) categoryAdapter.getItem(itemPosition);
-                MyApp app = (MyApp) getApplication();
+                MdNgaApplication app = (MdNgaApplication) getApplication();
                 app.addToUserList(u.getUserId(), u.getCid(),
                         u.getNickName(), u.getReplyString(), u.getReplyTotalNum(), u.getBlackList());
                 PhoneConfiguration.getInstance().setUid(u.getUserId());

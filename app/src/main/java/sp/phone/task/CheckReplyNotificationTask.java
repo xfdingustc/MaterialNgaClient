@@ -22,9 +22,9 @@ import com.alibaba.fastjson.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
+import cn.whaley.materialngaclient.app.MdNgaApplication;
 import gov.anzong.androidnga.R;
 import gov.anzong.androidnga.Utils;
-import cn.whaley.materialngaclient.app.MyApp;
 import gov.anzong.androidnga.activity.ReplyListActivity;
 import sp.phone.bean.MsgNotificationObject;
 import sp.phone.bean.NotificationObject;
@@ -136,7 +136,7 @@ public class CheckReplyNotificationTask extends
                     for (User u : userList) {
                         if (u.getUserId().equals(
                                 PhoneConfiguration.getInstance().uid)) {
-                            MyApp app = (MyApp) ((Activity) context)
+                            MdNgaApplication app = (MdNgaApplication) ((Activity) context)
                                     .getApplication();
                             app.addToUserList(u.getUserId(), u.getCid(),
                                     u.getNickName(), recentstr, list.size(),

@@ -24,8 +24,8 @@ import com.alibaba.fastjson.JSON;
 
 import java.util.List;
 
+import cn.whaley.materialngaclient.app.MdNgaApplication;
 import gov.anzong.androidnga.R;
-import cn.whaley.materialngaclient.app.MyApp;
 import sp.phone.adapter.RecentReplyAdapter;
 import sp.phone.bean.NotificationObject;
 import sp.phone.bean.PerferenceConstant;
@@ -218,7 +218,7 @@ public class RecentReplyListFragment extends Fragment implements OnRecentNotifie
             for (User u : userList) {
                 if (u.getUserId().equals(
                         PhoneConfiguration.getInstance().uid)) {
-                    MyApp app = ((MyApp) getActivity().getApplication());
+                    MdNgaApplication app = ((MdNgaApplication) getActivity().getApplication());
                     app.addToUserList(u.getUserId(), u.getCid(),
                             u.getNickName(), "", 0, u.getBlackList());
                     break;

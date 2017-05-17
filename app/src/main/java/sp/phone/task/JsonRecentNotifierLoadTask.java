@@ -14,8 +14,8 @@ import com.alibaba.fastjson.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
+import cn.whaley.materialngaclient.app.MdNgaApplication;
 import gov.anzong.androidnga.Utils;
-import cn.whaley.materialngaclient.app.MyApp;
 import sp.phone.bean.NotificationObject;
 import sp.phone.bean.PerferenceConstant;
 import sp.phone.bean.User;
@@ -69,7 +69,7 @@ public class JsonRecentNotifierLoadTask extends AsyncTask<String, Integer, Strin
                 for (User u : userList) {
                     if (u.getUserId().equals(
                             PhoneConfiguration.getInstance().uid)) {
-                        MyApp app = ((MyApp) ((Activity) context).getApplication());
+                        MdNgaApplication app = ((MdNgaApplication) ((Activity) context).getApplication());
                         app.addToUserList(u.getUserId(), u.getCid(),
                                 u.getNickName(), "", 0, u.getBlackList());
                         break;
@@ -147,7 +147,7 @@ public class JsonRecentNotifierLoadTask extends AsyncTask<String, Integer, Strin
                 for (User u : userList) {
                     if (u.getUserId().equals(
                             PhoneConfiguration.getInstance().uid)) {
-                        MyApp app = (MyApp) ((Activity) context)
+                        MdNgaApplication app = (MdNgaApplication) ((Activity) context)
                                 .getApplication();
                         app.addToUserList(u.getUserId(), u.getCid(),
                                 u.getNickName(), recentstr, list.size(),

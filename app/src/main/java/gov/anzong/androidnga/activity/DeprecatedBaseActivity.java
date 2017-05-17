@@ -18,7 +18,8 @@ import static sp.phone.bean.PerferenceConstant.NIGHT_MODE;
 import static sp.phone.bean.PerferenceConstant.PERFERENCE;
 
 
-public class BaseActivity extends ActionBarActivity {
+@Deprecated
+public class DeprecatedBaseActivity extends ActionBarActivity {
 
     protected Toast toast;
 

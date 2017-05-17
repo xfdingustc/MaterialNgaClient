@@ -7,7 +7,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Locale;
 
-import cn.whaley.materialngaclient.app.MyApp;
+import cn.whaley.materialngaclient.app.MdNgaApplication;
 
 public class HttpPostClient {
     private static final String LOG_TAG = HttpPostClient.class
@@ -50,7 +50,7 @@ public class HttpPostClient {
         if (machine.length() < 19) {
             machine = "[" + machine + "]";
         }
-        final String USER_AGENT = new StringBuilder().append("Nga_Official/").append(MyApp.version).append("(").append(machine).append(";Android").append(android.os.Build.VERSION.RELEASE).append(")").toString();
+        final String USER_AGENT = new StringBuilder().append("Nga_Official/").append(MdNgaApplication.version).append("(").append(machine).append(";Android").append(android.os.Build.VERSION.RELEASE).append(")").toString();
 
         try {
 

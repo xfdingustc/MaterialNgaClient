@@ -39,9 +39,9 @@ import java.io.InputStream;
 import java.util.HashSet;
 import java.util.Set;
 
+import cn.whaley.materialngaclient.app.MdNgaApplication;
 import gov.anzong.androidnga.R;
 import gov.anzong.androidnga.Utils;
-import cn.whaley.materialngaclient.app.MyApp;
 import gov.anzong.androidnga.util.NetUtil;
 import sp.phone.bean.AvatarTag;
 import sp.phone.bean.PerferenceConstant;
@@ -315,7 +315,7 @@ public class ArticleListFragmentNew extends Fragment implements
                     editor.putString(BLACK_LIST, blickliststring);
                     editor.apply();
                     if (!StringUtil.isEmpty(PhoneConfiguration.getInstance().uid)) {
-                        MyApp app = (MyApp) getActivity().getApplication();
+                        MdNgaApplication app = (MdNgaApplication) getActivity().getApplication();
                         app.upgradeUserdata(blacklist.toString());
                     } else {
                         if (toast != null) {

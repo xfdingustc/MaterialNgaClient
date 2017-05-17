@@ -11,7 +11,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import gov.anzong.androidnga.Utils;
-import cn.whaley.materialngaclient.app.MyApp;
+import cn.whaley.materialngaclient.app.MdNgaApplication;
 
 public class UploadCookieCollector {
     //static final String collectURL = "http://bbs.ngacn.cc/nuke.php";
@@ -65,7 +65,7 @@ public class UploadCookieCollector {
         if (machine.length() < 19) {
             machine = "[" + machine + "]";
         }
-        final String USER_AGENT = new StringBuilder().append("Nga_Official/").append(MyApp.version).append("(").append(machine).append(";Android").append(android.os.Build.VERSION.RELEASE).append(")").toString();
+        final String USER_AGENT = new StringBuilder().append("Nga_Official/").append(MdNgaApplication.version).append("(").append(machine).append(";Android").append(android.os.Build.VERSION.RELEASE).append(")").toString();
 
         try {
             URL url = new URL(urlString);

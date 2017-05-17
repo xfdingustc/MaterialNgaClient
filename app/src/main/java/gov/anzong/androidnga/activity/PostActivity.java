@@ -42,7 +42,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 
-import cn.whaley.materialngaclient.app.MyApp;
+import cn.whaley.materialngaclient.app.MdNgaApplication;
 import gov.anzong.androidnga.R;
 import gov.anzong.androidnga.Utils;
 import sp.phone.adapter.ActionBarUserListAdapter;
@@ -192,7 +192,7 @@ public class PostActivity extends BasePostActivity implements
                 public void onItemSelected(AdapterView<?> parent, View view,
                                            int position, long id) {
                     User u = (User) parent.getItemAtPosition(position);
-                    MyApp app = (MyApp) getApplication();
+                    MdNgaApplication app = (MdNgaApplication) getApplication();
                     app.addToUserList(u.getUserId(), u.getCid(),
                             u.getNickName(), u.getReplyString(),
                             u.getReplyTotalNum(), u.getBlackList());
@@ -242,7 +242,7 @@ public class PostActivity extends BasePostActivity implements
             public boolean onNavigationItemSelected(int itemPosition,
                                                     long itemId) {
                 User u = (User) categoryAdapter.getItem(itemPosition);
-                MyApp app = (MyApp) getApplication();
+                MdNgaApplication app = (MdNgaApplication) getApplication();
                 app.addToUserList(u.getUserId(), u.getCid(), u.getNickName(),
                         u.getReplyString(), u.getReplyTotalNum(),
                         u.getBlackList());

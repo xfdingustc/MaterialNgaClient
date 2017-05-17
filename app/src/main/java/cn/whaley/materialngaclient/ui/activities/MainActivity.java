@@ -65,11 +65,15 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import butterknife.BindView;
+import butterknife.ButterKnife;
+import cn.whaley.materialngaclient.app.MdNgaApplication;
+import cn.whaley.materialngaclient.libs.BaseActivity;
+import cn.whaley.materialngaclient.libs.qualifiers.RequiresActivityViewModel;
+import cn.whaley.materialngaclient.viewmodels.MainViewModel;
 import de.hdodenhof.circleimageview.CircleImageView;
 import gov.anzong.androidnga.R;
 import gov.anzong.androidnga.Utils;
-import gov.anzong.androidnga.activity.BaseActivity;
-import cn.whaley.materialngaclient.app.MyApp;
+import gov.anzong.androidnga.activity.DeprecatedBaseActivity;
 import gov.anzong.androidnga.activity.NearbyUserActivity;
 import gov.anzong.androidnga.activity.SettingsActivity;
 import sp.phone.adapter.BoardPagerAdapter;
@@ -89,17 +93,17 @@ import sp.phone.utils.PhoneConfiguration;
 import sp.phone.utils.StringUtil;
 import sp.phone.utils.ThemeManager;
 
-public class MainActivity extends BaseActivity implements PerferenceConstant, PageCategoryOwnner, OnItemClickListener {
+@RequiresActivityViewModel(MainViewModel.class)
+public class MainActivity extends BaseActivity<MainViewModel> implements PerferenceConstant, PageCategoryOwnner, OnItemClickListener {
     static final String TAG = MainActivity.class.getSimpleName();
     private ActivityUtil activityUtil = ActivityUtil.getInstance();
-    private MyApp app;
+    private MdNgaApplication app;
 
     private ActionBarDrawerToggle mDrawerToggle;
     private BoardHolder boardInfo;
 
     private SharedPreferences share;
 
-    private MediaPlayer mp = new MediaPlayer();
     private Animation rightInAnimation;
     private Animation rightOutAnimation;
     private String fulimode = "0";
@@ -147,15 +151,22 @@ public class MainActivity extends BaseActivity implements PerferenceConstant, Pa
     @BindView(R.id.tab_layout)
     TabLayout tabLayout;
 
+    @BindView(R.id.toolbar)
+    Toolbar toolbar;
+
     CircleImageView avatarView;
+
+    private Toolbar getToolbar() {
+        return toolbar;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        this.setTheme(R.style.AppTheme);
+        ((MdNgaApplication)getApplication()).component().inject(this);
         share = getSharedPreferences(PERFERENCE, Activity.MODE_PRIVATE);
 
-        app = ((MyApp) getApplication());
+        app = ((MdNgaApplication) getApplication());
         fulimode = share.getString(CAN_SHOW_FULI, "0");
         initDate();
         initView();
@@ -188,6 +199,7 @@ public class MainActivity extends BaseActivity implements PerferenceConstant, Pa
 
     private void initView() {
         setContentView(R.layout.mainfragment);
+        ButterKnife.bind(this);
         setupNavView();
         getToolbar().setTitle(R.string.start_title);
         getToolbar().inflateMenu(R.menu.main_menu);
@@ -497,16 +509,6 @@ public class MainActivity extends BaseActivity implements PerferenceConstant, Pa
         }.start();
 
     }
-
-    public boolean isTablet() {
-        boolean xlarge = ((getResources().getConfiguration().screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK) == 0x04);// Configuration.SCREENLAYOUT_SIZE_XLARGE);
-        boolean large = ((getResources().getConfiguration().screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK) == Configuration.SCREENLAYOUT_SIZE_LARGE);
-        return (xlarge || large) && ActivityUtil.isGreaterThan_2_3_3();
-    }
-
-
-
-
 
     private void jumpToSetting() {
         Intent intent = new Intent();
@@ -912,13 +914,6 @@ public class MainActivity extends BaseActivity implements PerferenceConstant, Pa
         editor.apply();
     }
 
-    @Override
-    protected void onStop() {
-        mp.release();
-        mp = new MediaPlayer();
-        super.onStop();
-    }
-
     @SuppressWarnings("WrongConstant")
     @Override
     protected void onResume() {
@@ -1089,6 +1084,10 @@ public class MainActivity extends BaseActivity implements PerferenceConstant, Pa
             }// for i
 
         }
+
+    }
+
+    private void showToast(String msg) {
 
     }
 

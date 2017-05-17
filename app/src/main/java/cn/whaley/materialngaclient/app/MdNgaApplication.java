@@ -7,6 +7,7 @@ import android.content.SharedPreferences.Editor;
 import android.content.pm.ActivityInfo;
 import android.os.Build;
 import android.os.Environment;
+import android.support.annotation.CallSuper;
 import android.util.Log;
 
 import com.alibaba.fastjson.JSON;
@@ -18,6 +19,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import cn.whaley.materialngaclient.ApplicationComponent;
+import cn.whaley.materialngaclient.ApplicationModule;
+import cn.whaley.materialngaclient.DaggerApplicationComponent;
 import gov.anzong.androidnga.BuildConfig;
 import gov.anzong.androidnga.CrashHandler;
 import gov.anzong.androidnga.R;
@@ -33,15 +37,18 @@ import sp.phone.utils.PhoneConfiguration;
 import sp.phone.utils.StringUtil;
 import sp.phone.utils.ThemeManager;
 
-public class MyApp extends Application implements PerferenceConstant {
+public class MdNgaApplication extends Application implements PerferenceConstant {
     public final static int version = BuildConfig.VERSION_CODE;
+    private ApplicationComponent component;
+
     public static final int fddicon[][] = {};
     static final String RECENT = "最近访问";
     static final String ADDFID = "用户自定义";
-    final private static String TAG = MyApp.class.getSimpleName();
+    final private static String TAG = MdNgaApplication.class.getSimpleName();
     boolean newVersion = false;
     private PhoneConfiguration config = null;
 
+    @CallSuper
     @Override
     public void onCreate() {
         if (LeakCanary.isInAnalyzerProcess(this)) {
@@ -74,7 +81,10 @@ public class MyApp extends Application implements PerferenceConstant {
                 .hideThreadInfo()
                 .methodCount(1);
 
-
+        component = DaggerApplicationComponent.builder()
+            .applicationModule(new ApplicationModule(this))
+            .build();
+        component().inject(this);
         super.onCreate();
     }
 
@@ -824,6 +834,10 @@ public class MyApp extends Application implements PerferenceConstant {
 
     public PhoneConfiguration getConfig() {
         return config;
+    }
+
+    public ApplicationComponent component() {
+        return component;
     }
 
 }

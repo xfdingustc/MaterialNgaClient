@@ -1,4 +1,4 @@
-package cn.whaley.materialngaclient.rxjava;
+package cn.whaley.materialngaclient.libs.rx;
 
 import rx.Subscriber;
 

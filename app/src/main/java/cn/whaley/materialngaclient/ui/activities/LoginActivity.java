@@ -15,7 +15,6 @@ import android.view.Menu;
 
 import android.view.WindowManager;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -33,9 +32,9 @@ import java.util.concurrent.TimeUnit;
 import butterknife.BindView;
 import butterknife.OnClick;
 import cn.whaley.materialngaclient.app.Consts;
-import cn.whaley.materialngaclient.app.MyApp;
+import cn.whaley.materialngaclient.app.MdNgaApplication;
 import cn.whaley.materialngaclient.rest.INgaApi;
-import cn.whaley.materialngaclient.rxjava.SimpleSubscriber;
+import cn.whaley.materialngaclient.libs.rx.SimpleSubscriber;
 import gov.anzong.androidnga.R;
 import gov.anzong.androidnga.activity.SwipeBackAppCompatActivity;
 import okhttp3.Headers;
@@ -407,7 +406,7 @@ public class LoginActivity extends SwipeBackAppCompatActivity implements Perfere
                 .putString(USER_NAME, name)
                 .putString(BLACK_LIST, "");
         editor.apply();
-        MyApp app = (MyApp) getApplication();
+        MdNgaApplication app = (MdNgaApplication) getApplication();
         app.addToUserList(uid, cid, name, "", 0, "");
 
         PhoneConfiguration.getInstance().setUid(uid);
