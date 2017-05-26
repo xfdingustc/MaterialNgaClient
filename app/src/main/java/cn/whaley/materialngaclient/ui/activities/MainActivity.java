@@ -20,7 +20,6 @@ import android.graphics.PorterDuff.Mode;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.RectF;
-import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -31,6 +30,7 @@ import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
@@ -51,6 +51,7 @@ import android.widget.ImageView;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.alibaba.fastjson.JSON;
+import com.jakewharton.rxbinding.support.v4.widget.RxDrawerLayout;
 
 import java.io.File;
 import java.io.IOException;
@@ -69,13 +70,14 @@ import butterknife.ButterKnife;
 import cn.whaley.materialngaclient.app.MdNgaApplication;
 import cn.whaley.materialngaclient.libs.BaseActivity;
 import cn.whaley.materialngaclient.libs.qualifiers.RequiresActivityViewModel;
+import cn.whaley.materialngaclient.libs.rx.Transformers;
 import cn.whaley.materialngaclient.viewmodels.MainViewModel;
 import de.hdodenhof.circleimageview.CircleImageView;
 import gov.anzong.androidnga.R;
 import gov.anzong.androidnga.Utils;
-import gov.anzong.androidnga.activity.DeprecatedBaseActivity;
 import gov.anzong.androidnga.activity.NearbyUserActivity;
 import gov.anzong.androidnga.activity.SettingsActivity;
+import rx.functions.Action1;
 import sp.phone.adapter.BoardPagerAdapter;
 import sp.phone.bean.AvatarTag;
 import sp.phone.bean.Board;
@@ -99,7 +101,7 @@ public class MainActivity extends BaseActivity<MainViewModel> implements Perfere
     private ActivityUtil activityUtil = ActivityUtil.getInstance();
     private MdNgaApplication app;
 
-    private ActionBarDrawerToggle mDrawerToggle;
+//    private ActionBarDrawerToggle mDrawerToggle;
     private BoardHolder boardInfo;
 
     private SharedPreferences share;
@@ -140,7 +142,7 @@ public class MainActivity extends BaseActivity<MainViewModel> implements Perfere
     }
 
     @BindView(R.id.drawer_layout)
-    DrawerLayout mDrawerLayout;
+    DrawerLayout drawerLayout;
 
     @BindView(R.id.nav_view)
     NavigationView navView;
@@ -170,6 +172,22 @@ public class MainActivity extends BaseActivity<MainViewModel> implements Perfere
         fulimode = share.getString(CAN_SHOW_FULI, "0");
         initDate();
         initView();
+
+        viewModel.outputs.drawerIsOpen()
+            .compose(this.<Boolean>bindToLifecycle())
+            .compose(Transformers.<Boolean>observerForUI())
+            .subscribe(RxDrawerLayout.open(drawerLayout, GravityCompat.START));
+
+        RxDrawerLayout.drawerOpen(drawerLayout, GravityCompat.START)
+            .skip(1)
+            .compose(this.<Boolean>bindToLifecycle())
+            .compose(Transformers.<Boolean>observerForUI())
+            .subscribe(new Action1<Boolean>() {
+                @Override
+                public void call(Boolean aBoolean) {
+                    viewModel.inputs.openDrawer(aBoolean);
+                }
+            });
 
         checknewversion();
     }
@@ -223,9 +241,9 @@ public class MainActivity extends BaseActivity<MainViewModel> implements Perfere
     }
 
     private void setupActionBarToggle() {
-        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, getToolbar(), R.string.drawer_open, R.string.drawer_close);
-        mDrawerLayout.setDrawerListener(mDrawerToggle);
-        mDrawerToggle.syncState();
+//        mDrawerToggle = new ActionBarDrawerToggle(this, drawerLayout, getToolbar(), R.string.drawer_open, R.string.drawer_close);
+//        drawerLayout.setDrawerListener(mDrawerToggle);
+//        mDrawerToggle.syncState();
 
     }
 
@@ -292,7 +310,7 @@ public class MainActivity extends BaseActivity<MainViewModel> implements Perfere
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         // Pass any configuration change to the drawer toggls
-        mDrawerToggle.onConfigurationChanged(newConfig);
+//        mDrawerToggle.onConfigurationChanged(newConfig);
     }
 
 

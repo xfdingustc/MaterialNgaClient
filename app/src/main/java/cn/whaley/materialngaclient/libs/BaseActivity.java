@@ -44,6 +44,10 @@ public abstract class BaseActivity<ViewModelType extends ActivityViewModel> exte
         return RxLifecycle.bindUntilEvent(lifecycle, event);
     }
 
+    public final <T> Observable.Transformer<T, T> bindToLifecycle() {
+        return RxLifecycle.bind(lifecycle);
+    }
+
     @CallSuper
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {

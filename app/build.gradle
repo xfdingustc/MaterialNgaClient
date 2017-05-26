@@ -67,4 +67,6 @@ dependencies {
     compile 'com.jakewharton.timber:timber:4.5.1'
     compile 'com.github.frankiesardo:auto-parcel:0.3.1'
     compile 'com.github.frankiesardo:auto-parcel-processor:0.3.1'
+    compile 'com.jakewharton.rxbinding:rxbinding:1.0.1'
+    compile 'com.jakewharton.rxbinding:rxbinding-support-v4:1.0.1'
 }
