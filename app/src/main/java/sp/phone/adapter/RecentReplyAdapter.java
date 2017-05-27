@@ -20,7 +20,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import cn.whaley.materialngaclient.app.MdNgaApplication;
+import io.xfdingustc.mdngaclient.app.MdNgaApplication;
 import gov.anzong.androidnga.R;
 import sp.phone.bean.NotificationObject;
 import sp.phone.bean.PerferenceConstant;

@@ -30,7 +30,7 @@ import android.widget.ListView;
 
 import java.util.Set;
 
-import cn.whaley.materialngaclient.app.MdNgaApplication;
+import io.xfdingustc.mdngaclient.app.MdNgaApplication;
 import gov.anzong.androidnga.R;
 import gov.anzong.androidnga.Utils;
 import sp.phone.adapter.ArticleListAdapter;

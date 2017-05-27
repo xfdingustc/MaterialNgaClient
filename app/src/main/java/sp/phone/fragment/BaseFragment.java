@@ -4,7 +4,7 @@ import android.support.v4.app.Fragment;
 import android.view.MenuItem;
 import android.widget.Toast;
 
-import cn.whaley.materialngaclient.libs.BaseActivity;
+import io.xfdingustc.mdngaclient.libs.BaseActivity;
 
 /**
  * Created by liuboyu on 16/6/28.

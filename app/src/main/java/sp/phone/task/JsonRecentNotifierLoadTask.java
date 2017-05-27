@@ -14,7 +14,7 @@ import com.alibaba.fastjson.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
-import cn.whaley.materialngaclient.app.MdNgaApplication;
+import io.xfdingustc.mdngaclient.app.MdNgaApplication;
 import gov.anzong.androidnga.Utils;
 import sp.phone.bean.NotificationObject;
 import sp.phone.bean.PerferenceConstant;

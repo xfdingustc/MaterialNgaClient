@@ -18,7 +18,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 
-import cn.whaley.materialngaclient.app.MdNgaApplication;
+import io.xfdingustc.mdngaclient.app.MdNgaApplication;
 import gov.anzong.androidnga.R;
 import sp.phone.utils.HttpUtil;
 import sp.phone.utils.PhoneConfiguration;

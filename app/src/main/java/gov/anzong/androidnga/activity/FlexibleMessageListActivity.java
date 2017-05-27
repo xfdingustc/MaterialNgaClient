@@ -25,7 +25,7 @@ import android.widget.FrameLayout;
 import android.widget.HeaderViewListAdapter;
 import android.widget.ListView;
 
-import cn.whaley.materialngaclient.app.MdNgaApplication;
+import io.xfdingustc.mdngaclient.app.MdNgaApplication;
 import gov.anzong.androidnga.R;
 import sp.phone.adapter.ActionBarUserListAdapter;
 import sp.phone.adapter.MessageListAdapter;

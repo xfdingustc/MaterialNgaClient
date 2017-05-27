@@ -59,7 +59,7 @@ import android.widget.Toast;
 import java.lang.reflect.Field;
 import java.util.HashSet;
 
-import cn.whaley.materialngaclient.app.MdNgaApplication;
+import io.xfdingustc.mdngaclient.app.MdNgaApplication;
 import gov.anzong.androidnga.R;
 import gov.anzong.androidnga.util.NetUtil;
 import noname.gson.parse.NonameReadBody;

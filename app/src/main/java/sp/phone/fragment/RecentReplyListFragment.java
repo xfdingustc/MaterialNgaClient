@@ -24,7 +24,7 @@ import com.alibaba.fastjson.JSON;
 
 import java.util.List;
 
-import cn.whaley.materialngaclient.app.MdNgaApplication;
+import io.xfdingustc.mdngaclient.app.MdNgaApplication;
 import gov.anzong.androidnga.R;
 import sp.phone.adapter.RecentReplyAdapter;
 import sp.phone.bean.NotificationObject;

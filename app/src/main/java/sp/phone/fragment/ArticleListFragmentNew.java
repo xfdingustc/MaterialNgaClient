@@ -39,7 +39,7 @@ import java.io.InputStream;
 import java.util.HashSet;
 import java.util.Set;
 
-import cn.whaley.materialngaclient.app.MdNgaApplication;
+import io.xfdingustc.mdngaclient.app.MdNgaApplication;
 import gov.anzong.androidnga.R;
 import gov.anzong.androidnga.Utils;
 import gov.anzong.androidnga.util.NetUtil;

@@ -37,7 +37,7 @@ import gov.anzong.androidnga.activity.HaSplitNonameArticleListActivity;
 import gov.anzong.androidnga.activity.HaSplitNonamePostActivity;
 import gov.anzong.androidnga.activity.HaSplitPostActivity;
 import gov.anzong.androidnga.activity.HaSplitSignPostActivity;
-import cn.whaley.materialngaclient.ui.activities.LoginActivity;
+import io.xfdingustc.mdngaclient.activities.LoginActivity;
 import gov.anzong.androidnga.activity.MessageDetialActivity;
 import gov.anzong.androidnga.activity.MessagePostActivity;
 import gov.anzong.androidnga.activity.NonameArticleListActivity;

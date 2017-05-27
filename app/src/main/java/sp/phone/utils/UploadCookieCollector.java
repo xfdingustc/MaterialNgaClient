@@ -11,7 +11,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import gov.anzong.androidnga.Utils;
-import cn.whaley.materialngaclient.app.MdNgaApplication;
+import io.xfdingustc.mdngaclient.app.MdNgaApplication;
 
 public class UploadCookieCollector {
     //static final String collectURL = "http://bbs.ngacn.cc/nuke.php";

@@ -23,7 +23,7 @@
       android:required="false" />
 
   <application
-      android:name="cn.whaley.materialngaclient.app.MdNgaApplication"
+      android:name="io.xfdingustc.mdngaclient.app.MdNgaApplication"
       android:anyDensity="false"
       android:hardwareAccelerated="false"
       android:icon="@drawable/nga_bg"
@@ -31,7 +31,7 @@
       android:theme="@android:style/Theme.Holo.Light"
       tools:ignore="AllowBackup">
     <activity
-        android:name="cn.whaley.materialngaclient.ui.activities.MainActivity"
+        android:name="io.xfdingustc.mdngaclient.activities.MainActivity"
         android:label="@string/app_name"
         android:theme="@style/AppTheme">
       <intent-filter>
@@ -41,7 +41,7 @@
       </intent-filter>
     </activity>
     <activity
-        android:name="cn.whaley.materialngaclient.ui.activities.LoginActivity"
+        android:name="io.xfdingustc.mdngaclient.activities.LoginActivity"
         android:theme="@style/SwipeBackTheme" />
     <activity
         android:name="gov.anzong.meizi.MeiziLoginActivity"
