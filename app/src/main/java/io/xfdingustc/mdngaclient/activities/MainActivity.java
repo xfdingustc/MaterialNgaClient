@@ -33,7 +33,6 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
@@ -215,7 +214,7 @@ public class MainActivity extends BaseActivity<MainViewModel> implements Perfere
     }
 
     private void initView() {
-        setContentView(R.layout.mainfragment);
+        setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
         setupNavView();
         getToolbar().setTitle(R.string.start_title);
@@ -232,19 +231,17 @@ public class MainActivity extends BaseActivity<MainViewModel> implements Perfere
             }
         });
 
-        setSupportActionBar(getToolbar());
-        ActionBar actionBar = getSupportActionBar();
-        actionBar.setDisplayHomeAsUpEnabled(true);
 
-        setupActionBarToggle();
-    }
+        getToolbar().setNavigationOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                drawerLayout.openDrawer(GravityCompat.START);
+            }
+        });
 
-    private void setupActionBarToggle() {
-//        mDrawerToggle = new ActionBarDrawerToggle(this, drawerLayout, getToolbar(), R.string.drawer_open, R.string.drawer_close);
-//        drawerLayout.setDrawerListener(mDrawerToggle);
-//        mDrawerToggle.syncState();
 
     }
+
 
     private void setupNavView() {
         avatarView = (CircleImageView) navView.getHeaderView(0).findViewById(R.id.user_avatar);

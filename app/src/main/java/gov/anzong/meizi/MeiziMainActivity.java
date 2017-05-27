@@ -59,7 +59,7 @@ public class MeiziMainActivity extends ActionBarActivity implements
     private void initView() {
         mMeiziCategoryFragment = new MeiziCategoryFragment();
         fm = getSupportFragmentManager();
-        view = LayoutInflater.from(this).inflate(R.layout.activity_main, null);
+        view = LayoutInflater.from(this).inflate(R.layout.activity_main_meizi, null);
         setContentView(view);
         PullToRefreshAttacher.Options options = new PullToRefreshAttacher.Options();
         mPullToRefreshAttacher = PullToRefreshAttacher.get(this, options);
