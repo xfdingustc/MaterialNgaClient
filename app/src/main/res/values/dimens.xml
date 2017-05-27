@@ -1,5 +1,5 @@
 <resources>
-
+    <dimen name="grid_1_half">4dp</dimen>
     <!-- Default screen margins, per the Android Design guidelines. -->
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
@@ -11,4 +11,5 @@
     <dimen name="headline">18sp</dimen>
     <dimen name="editorial_subhead">20sp</dimen>
     <dimen name="editorial_headline">22sp</dimen>
+    <dimen name="button_corner_radius">@dimen/grid_1_half</dimen>
 </resources>

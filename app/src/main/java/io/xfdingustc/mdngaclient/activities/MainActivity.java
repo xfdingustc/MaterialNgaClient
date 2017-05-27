@@ -2,6 +2,9 @@ package io.xfdingustc.mdngaclient.activities;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Fragment;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -27,9 +30,7 @@ import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
 
 import android.support.v4.app.DialogFragment;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
+
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
@@ -156,9 +157,7 @@ public class MainActivity extends BaseActivity<MainViewModel> implements Perfere
 
     CircleImageView avatarView;
 
-    private Toolbar getToolbar() {
-        return toolbar;
-    }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -215,7 +214,7 @@ public class MainActivity extends BaseActivity<MainViewModel> implements Perfere
 
     private void initView() {
         setContentView(R.layout.activity_main);
-        ButterKnife.bind(this);
+
         setupNavView();
         getToolbar().setTitle(R.string.start_title);
         getToolbar().inflateMenu(R.menu.main_menu);
@@ -297,7 +296,7 @@ public class MainActivity extends BaseActivity<MainViewModel> implements Perfere
 
     public void updatepager() {
         int width = getResources().getInteger(R.integer.page_category_width);
-        viewPager.setAdapter(new BoardPagerAdapter(getSupportFragmentManager(), this, width));
+        viewPager.setAdapter(new BoardPagerAdapter(getFragmentManager(), this, width));
         tabLayout.setupWithViewPager(viewPager);
     }
 
@@ -316,20 +315,20 @@ public class MainActivity extends BaseActivity<MainViewModel> implements Perfere
         DialogFragment df = new ProfileSearchDialogFragment();
         df.setArguments(arg);
         final String dialogTag = "searchpaofile_dialog";
-        FragmentManager fm = this.getSupportFragmentManager();
+        FragmentManager fm = this.getFragmentManager();
         FragmentTransaction ft = fm.beginTransaction();
         Fragment prev = fm.findFragmentByTag(dialogTag);
         if (prev != null) {
             ft.remove(prev);
         }
 
-        try {
-            df.show(ft, dialogTag);
-        } catch (Exception e) {
-            Log.e(TopicListContainer.class.getSimpleName(),
-                    Log.getStackTraceString(e));
-
-        }
+//        try {
+//            df.show(ft, dialogTag);
+//        } catch (Exception e) {
+//            Log.e(TopicListContainer.class.getSimpleName(),
+//                    Log.getStackTraceString(e));
+//
+//        }
     }
 
     private void signmission() {

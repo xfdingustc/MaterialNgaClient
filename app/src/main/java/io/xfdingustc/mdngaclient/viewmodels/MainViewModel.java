@@ -5,7 +5,7 @@ import android.support.annotation.NonNull;
 import io.xfdingustc.mdngaclient.libs.ActivityViewModel;
 import io.xfdingustc.mdngaclient.libs.Environment;
 import io.xfdingustc.mdngaclient.activities.MainActivity;
-import io.xfdingustc.mdngaclient.viewmodels.outputs.MainViewModelInputs;
+import io.xfdingustc.mdngaclient.viewmodels.inputs.MainViewModelInputs;
 import io.xfdingustc.mdngaclient.viewmodels.outputs.MainViewModelOutputs;
 import rx.Observable;
 import rx.functions.Action1;

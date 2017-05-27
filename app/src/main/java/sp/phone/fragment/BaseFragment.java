@@ -4,6 +4,7 @@ import android.support.v4.app.Fragment;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import gov.anzong.androidnga.activity.DeprecatedBaseActivity;
 import io.xfdingustc.mdngaclient.libs.BaseActivity;
 
 /**
@@ -27,8 +28,8 @@ public class BaseFragment extends Fragment {
         toast.show();
     }
 
-    protected BaseActivity getBaseActivity() {
-        return (BaseActivity) getActivity();
+    protected DeprecatedBaseActivity getBaseActivity() {
+        return (DeprecatedBaseActivity) getActivity();
     }
 
     protected void changeNightMode(final MenuItem menu) {

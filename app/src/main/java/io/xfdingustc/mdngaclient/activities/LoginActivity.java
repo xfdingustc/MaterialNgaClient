@@ -31,12 +31,17 @@ import java.util.concurrent.TimeUnit;
 
 import butterknife.BindView;
 import butterknife.OnClick;
+import butterknife.OnTextChanged;
 import io.xfdingustc.mdngaclient.app.Consts;
 import io.xfdingustc.mdngaclient.app.MdNgaApplication;
+import io.xfdingustc.mdngaclient.libs.BaseActivity;
+import io.xfdingustc.mdngaclient.libs.qualifiers.RequiresActivityViewModel;
+import io.xfdingustc.mdngaclient.libs.rx.Transformers;
 import io.xfdingustc.mdngaclient.rest.INgaApi;
 import io.xfdingustc.mdngaclient.libs.rx.SimpleSubscriber;
 import gov.anzong.androidnga.R;
 import gov.anzong.androidnga.activity.SwipeBackAppCompatActivity;
+import io.xfdingustc.mdngaclient.viewmodels.LoginViewModel;
 import okhttp3.Headers;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
@@ -47,6 +52,7 @@ import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import retrofit2.converter.scalars.ScalarsConverterFactory;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 import sp.phone.adapter.UserListAdapter;
@@ -56,7 +62,10 @@ import sp.phone.utils.ReflectionUtil;
 import sp.phone.utils.StringUtil;
 import sp.phone.utils.ThemeManager;
 
-public class LoginActivity extends SwipeBackAppCompatActivity implements PerferenceConstant {
+import static io.xfdingustc.mdngaclient.libs.rx.Transformers.observerForUI;
+
+@RequiresActivityViewModel(LoginViewModel.class)
+public class LoginActivity extends BaseActivity<LoginViewModel> implements PerferenceConstant {
     private static final String TAG = LoginActivity.class.getSimpleName();
 
     private String name;
@@ -80,13 +89,13 @@ public class LoginActivity extends SwipeBackAppCompatActivity implements Perfere
     }
 
     @BindView(R.id.login_button)
-    Button buttonLogin;
+    Button loginButton;
 
     @BindView(R.id.authcode_img)
     ImageView authcodeImg;
 
     @BindView(R.id.authcode_refresh)
-    ImageButton authcodeimgRefresh;
+    ImageView authcodeimgRefresh;
 
     @BindView(R.id.login_user_edittext)
     TextInputEditText userText;
@@ -103,6 +112,21 @@ public class LoginActivity extends SwipeBackAppCompatActivity implements Perfere
 
     @BindView(R.id.user_list)
     ListView userList;
+
+    @OnTextChanged(R.id.login_user_edittext)
+    void onUsernameTextChanged(CharSequence username) {
+        viewModel.inputs.username(username.toString());
+    }
+
+    @OnTextChanged(R.id.login_password_edittext)
+    void onPasswordTextChanged(CharSequence password) {
+        viewModel.inputs.password(password.toString());
+    }
+
+    @OnTextChanged(R.id.login_authcode_edittext)
+    void onAuthcodeTextChanged(CharSequence vcode) {
+        viewModel.inputs.vcode(vcode.toString());
+    }
 
     @OnClick({R.id.authcode_refresh, R.id.authcode_img})
     public void onAuthCodeRefreshClicked() {
@@ -155,6 +179,17 @@ public class LoginActivity extends SwipeBackAppCompatActivity implements Perfere
 //        ThemeManager.SetContextTheme(this);
 
         initViews();
+
+        viewModel.outputs.setLoginButtonIsEnabled()
+            .compose(this.<Boolean>bindToLifecycle())
+            .compose(Transformers.<Boolean>observerForUI())
+            .subscribe(new Action1<Boolean>() {
+                @Override
+                public void call(Boolean enabled) {
+                    Logger.t(TAG).d("set login button: " + enabled);
+                    loginButton.setEnabled(enabled);
+                }
+            });
 
         userList.setAdapter(new UserListAdapter(this, userText));
 
@@ -265,12 +300,7 @@ public class LoginActivity extends SwipeBackAppCompatActivity implements Perfere
     }
 
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        int flags = 15;
-        ReflectionUtil.actionBar_setDisplayOption(this, flags);
-        return super.onCreateOptionsMenu(menu);
-    }
+
 
     @Override
     protected void onResume() {
@@ -466,6 +496,14 @@ public class LoginActivity extends SwipeBackAppCompatActivity implements Perfere
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(intent);
         }
+    }
+
+    private void showToast(String toast) {
+
+    }
+
+    private void showToast(int toast) {
+
     }
 
 

@@ -3,12 +3,18 @@ package io.xfdingustc.mdngaclient.libs;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.CallSuper;
+import android.support.annotation.LayoutRes;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 
 import com.trello.rxlifecycle.RxLifecycle;
 import com.trello.rxlifecycle.android.ActivityEvent;
+import com.trello.rxlifecycle.components.RxActivity;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import gov.anzong.androidnga.R;
 import io.xfdingustc.mdngaclient.libs.qualifiers.RequiresActivityViewModel;
 import io.xfdingustc.mdngaclient.libs.utils.BundleUtils;
 import rx.Observable;
@@ -23,36 +29,40 @@ import timber.log.Timber;
  * Created by whaley on 2017/5/16.
  */
 
-public abstract class BaseActivity<ViewModelType extends ActivityViewModel> extends AppCompatActivity implements ActivityLifecycleType{
+public abstract class BaseActivity<ViewModelType extends ActivityViewModel> extends RxActivity implements ActivityLifecycleType{
     private final PublishSubject<Void> back = PublishSubject.create();
-    private final BehaviorSubject<ActivityEvent> lifecycle = BehaviorSubject.create();
+
     private static final String VIEW_MODEL_KEY = "viewModel";
     private final CompositeSubscription subscription = new CompositeSubscription();
     protected ViewModelType viewModel;
+
+    @Nullable
+    @BindView(R.id.toolbar)
+    Toolbar toolbar;
 
     public ViewModelType viewModel() {
         return viewModel;
     }
 
+    protected Toolbar getToolbar() {
+        return toolbar;
+    }
+
+    @CallSuper
     @Override
-    public final Observable<ActivityEvent> lifecycle() {
-        return lifecycle.asObservable();
+    public void setContentView(@LayoutRes int layoutResID) {
+        super.setContentView(layoutResID);
+        ButterKnife.bind(this);
     }
 
-    public final <T> Observable.Transformer<T, T> bindUntilEvent(final ActivityEvent event) {
-        return RxLifecycle.bindUntilEvent(lifecycle, event);
-    }
 
-    public final <T> Observable.Transformer<T, T> bindToLifecycle() {
-        return RxLifecycle.bind(lifecycle);
-    }
 
     @CallSuper
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Timber.d("onCreate %s", this.toString());
-        lifecycle.onNext(ActivityEvent.CREATE);
+
         assignViewModel(savedInstanceState);
         viewModel.intent(getIntent());
     }
@@ -70,7 +80,7 @@ public abstract class BaseActivity<ViewModelType extends ActivityViewModel> exte
     protected void onStart() {
         super.onStart();
         Timber.d("onStart %s", this.toString());
-        lifecycle.onNext(ActivityEvent.START);
+
 
         back
             .compose(bindUntilEvent(ActivityEvent.STOP))
@@ -88,14 +98,13 @@ public abstract class BaseActivity<ViewModelType extends ActivityViewModel> exte
     protected void onResume() {
         super.onResume();
         Timber.d("onResume %s", this.toString());
-        lifecycle.onNext(ActivityEvent.RESUME);
+
         assignViewModel(null);
     }
 
     @CallSuper
     @Override
     protected void onPause() {
-        lifecycle.onNext(ActivityEvent.PAUSE);
         super.onPause();
         Timber.d("onPause %s", this.toString());
 
@@ -108,7 +117,6 @@ public abstract class BaseActivity<ViewModelType extends ActivityViewModel> exte
     @CallSuper
     @Override
     protected void onStop() {
-        lifecycle.onNext(ActivityEvent.STOP);
         super.onStop();
         Timber.d("onStop %s", this.toString());
     }
@@ -116,7 +124,6 @@ public abstract class BaseActivity<ViewModelType extends ActivityViewModel> exte
     @CallSuper
     @Override
     protected void onDestroy() {
-        lifecycle.onNext(ActivityEvent.DESTROY);
         super.onDestroy();
         Timber.d("onDestroy %s", this.toString());
 
