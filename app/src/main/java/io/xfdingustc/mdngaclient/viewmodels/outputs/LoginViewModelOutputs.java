@@ -1,5 +1,7 @@
 package io.xfdingustc.mdngaclient.viewmodels.outputs;
 
+import android.graphics.Bitmap;
+
 import rx.Observable;
 
 /**
@@ -8,4 +10,6 @@ import rx.Observable;
 
 public interface LoginViewModelOutputs {
     Observable<Boolean> setLoginButtonIsEnabled();
+
+    Observable<Bitmap> setVerificationCode();
 }

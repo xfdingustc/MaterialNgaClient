@@ -67,6 +67,7 @@ public class LoginActivity extends BaseActivity<LoginViewModel> implements Perfe
 
     private String name;
 
+    private String authcodeCookie;
 
     private String action, messagemode;
     private String tid;
@@ -77,7 +78,7 @@ public class LoginActivity extends BaseActivity<LoginViewModel> implements Perfe
     private String title;
     private int mid;
     private boolean alreadylogin = false;
-    private String authcodeCookie;
+
 
 
     public static void launch(Activity activity) {
@@ -166,14 +167,6 @@ public class LoginActivity extends BaseActivity<LoginViewModel> implements Perfe
         // requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
         super.onCreate(savedInstanceState);
-        int orentation = ThemeManager.getInstance().screenOrentation;
-        if (orentation == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
-            || orentation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT) {
-            setRequestedOrientation(orentation);
-        } else {
-            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
-        }
-//        ThemeManager.SetContextTheme(this);
 
 
         initViews();
@@ -186,6 +179,16 @@ public class LoginActivity extends BaseActivity<LoginViewModel> implements Perfe
                 public void call(Boolean enabled) {
                     Logger.t(TAG).d("set login button: " + enabled);
                     loginButton.setEnabled(enabled);
+                }
+            });
+
+        viewModel.outputs.setVerificationCode()
+            .compose(this.<Bitmap>bindToLifecycle())
+            .compose(Transformers.<Bitmap>observerForUI())
+            .subscribe(new Action1<Bitmap>() {
+                @Override
+                public void call(Bitmap bitmap) {
+                    authcodeImg.setImageBitmap(bitmap);
                 }
             });
 
@@ -241,42 +244,6 @@ public class LoginActivity extends BaseActivity<LoginViewModel> implements Perfe
         authcodeText.setText("");
 
         authcodeImg.setImageDrawable(getResources().getDrawable(R.drawable.q_vcode));
-
-
-        final Environment environment = environment();
-        NgaApiService service = environment.apiClient();
-
-
-        service.fetchRegCode("gen_reg")
-            .map(new Func1<Response<ResponseBody>, Bitmap>() {
-                @Override
-                public Bitmap call(Response<ResponseBody> response) {
-                    okhttp3.Response rawResponse = response.raw();
-                    if (!rawResponse.headers("set-cookie").isEmpty()) {
-                        List<String> cookies = rawResponse.headers("set-cookie");
-                        for (String cookie : cookies) {
-//                                Logger.t(TAG).d("one cookie: " + cookie);
-                            cookie = cookie.substring(0, cookie.indexOf(';'));
-//                                Logger.t(TAG).d("cookie:" + cookie);
-                            if (cookie.indexOf("reg_vcode=") == 0 && cookie.indexOf("deleted") < 0) {
-                                authcodeCookie = cookie.substring(10);
-                                Logger.t(TAG).d("authcodeCookie:" + authcodeCookie);
-                            }
-                        }
-                    }
-                    return BitmapFactory.decodeStream(response.body().byteStream());
-                }
-            })
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(new SimpleSubscriber<Bitmap>() {
-                @Override
-                public void onNext(Bitmap bitmap) {
-                    authcodeImg.setImageBitmap(bitmap);
-                }
-            });
-
-
     }
 
 
