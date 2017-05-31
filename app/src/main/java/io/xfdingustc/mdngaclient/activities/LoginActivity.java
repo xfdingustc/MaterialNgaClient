@@ -4,9 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
-import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
 
 import android.support.design.widget.TextInputEditText;
@@ -25,7 +23,6 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import butterknife.BindView;
@@ -34,9 +31,8 @@ import butterknife.OnTextChanged;
 import io.xfdingustc.mdngaclient.app.Consts;
 import io.xfdingustc.mdngaclient.app.MdNgaApplication;
 import io.xfdingustc.mdngaclient.libs.BaseActivity;
-import io.xfdingustc.mdngaclient.libs.Environment;
 import io.xfdingustc.mdngaclient.libs.qualifiers.RequiresActivityViewModel;
-import io.xfdingustc.mdngaclient.libs.rx.Transformers;
+import io.xfdingustc.mdngaclient.libs.rx.transformers.Transformers;
 import io.xfdingustc.mdngaclient.services.NgaApiService;
 import io.xfdingustc.mdngaclient.libs.rx.SimpleSubscriber;
 import gov.anzong.androidnga.R;
@@ -47,19 +43,16 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 
 import okhttp3.ResponseBody;
-import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import retrofit2.converter.scalars.ScalarsConverterFactory;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
-import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 import sp.phone.adapter.UserListAdapter;
 import sp.phone.bean.PerferenceConstant;
 import sp.phone.utils.PhoneConfiguration;
 import sp.phone.utils.StringUtil;
-import sp.phone.utils.ThemeManager;
 
 @RequiresActivityViewModel(LoginViewModel.class)
 public class LoginActivity extends BaseActivity<LoginViewModel> implements PerferenceConstant {

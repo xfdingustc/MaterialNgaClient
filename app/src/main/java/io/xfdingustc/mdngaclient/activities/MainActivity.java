@@ -65,11 +65,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import butterknife.BindView;
-import butterknife.ButterKnife;
 import io.xfdingustc.mdngaclient.app.MdNgaApplication;
 import io.xfdingustc.mdngaclient.libs.BaseActivity;
 import io.xfdingustc.mdngaclient.libs.qualifiers.RequiresActivityViewModel;
-import io.xfdingustc.mdngaclient.libs.rx.Transformers;
+import io.xfdingustc.mdngaclient.libs.rx.transformers.Transformers;
 import io.xfdingustc.mdngaclient.viewmodels.MainViewModel;
 import de.hdodenhof.circleimageview.CircleImageView;
 import gov.anzong.androidnga.R;
@@ -85,7 +84,6 @@ import sp.phone.bean.BoardHolder;
 import sp.phone.bean.PerferenceConstant;
 
 import sp.phone.fragment.ProfileSearchDialogFragment;
-import sp.phone.fragment.TopicListContainer;
 import sp.phone.interfaces.PageCategoryOwnner;
 import sp.phone.utils.ActivityUtil;
 import sp.phone.utils.HttpUtil;

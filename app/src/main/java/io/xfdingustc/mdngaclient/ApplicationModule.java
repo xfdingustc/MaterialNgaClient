@@ -15,6 +15,8 @@ import io.xfdingustc.mdngaclient.libs.Environment;
 import dagger.Module;
 import dagger.Provides;
 import io.xfdingustc.mdngaclient.libs.qualifiers.ApiRetrofit;
+import io.xfdingustc.mdngaclient.services.NgaApiClient;
+import io.xfdingustc.mdngaclient.services.NgaApiClientType;
 import io.xfdingustc.mdngaclient.services.NgaApiService;
 import okhttp3.CookieJar;
 import okhttp3.JavaNetCookieJar;
@@ -39,10 +41,17 @@ public class ApplicationModule {
 
     @Provides
     @Singleton
-    Environment provideEnvironment(final @NonNull NgaApiService apiClient) {
+    Environment provideEnvironment(final @NonNull NgaApiClientType apiClient) {
         return Environment.builder()
             .apiClient(apiClient)
             .build();
+    }
+
+    @Provides
+    @Singleton
+    @NonNull
+    NgaApiClientType provideNgaApiClientType(@NonNull NgaApiService apiService) {
+        return new NgaApiClient(apiService);
     }
 
 

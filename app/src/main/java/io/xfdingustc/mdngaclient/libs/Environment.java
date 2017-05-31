@@ -3,6 +3,8 @@ package io.xfdingustc.mdngaclient.libs;
 import android.os.Parcelable;
 
 import auto.parcel.AutoParcel;
+import io.xfdingustc.mdngaclient.services.NgaApiClient;
+import io.xfdingustc.mdngaclient.services.NgaApiClientType;
 import io.xfdingustc.mdngaclient.services.NgaApiService;
 
 /**
@@ -11,11 +13,11 @@ import io.xfdingustc.mdngaclient.services.NgaApiService;
 
 @AutoParcel
 public abstract class Environment implements Parcelable {
-    public abstract NgaApiService apiClient();
+    public abstract NgaApiClientType apiClient();
 
     @AutoParcel.Builder
     public abstract static class Builder {
-        public abstract Builder apiClient(NgaApiService __);
+        public abstract Builder apiClient(NgaApiClientType __);
         public abstract Environment build();
     }
 

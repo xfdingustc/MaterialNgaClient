@@ -4,6 +4,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
+import android.view.View;
 
 import com.orhanobut.logger.Logger;
 
@@ -12,15 +13,16 @@ import java.util.List;
 import io.xfdingustc.mdngaclient.activities.LoginActivity;
 import io.xfdingustc.mdngaclient.libs.ActivityViewModel;
 import io.xfdingustc.mdngaclient.libs.Environment;
-import io.xfdingustc.mdngaclient.libs.rx.SimpleSubscriber;
-import io.xfdingustc.mdngaclient.services.NgaApiService;
+import io.xfdingustc.mdngaclient.libs.rx.transformers.Transformers;
+import io.xfdingustc.mdngaclient.services.NgaApiClient;
+import io.xfdingustc.mdngaclient.services.NgaApiClientType;
+import io.xfdingustc.mdngaclient.services.apiresponses.VCodeEnvelope;
 import io.xfdingustc.mdngaclient.viewmodels.errors.LoginViewModelErrors;
 import io.xfdingustc.mdngaclient.viewmodels.inputs.LoginViewModelInputs;
 import io.xfdingustc.mdngaclient.viewmodels.outputs.LoginViewModelOutputs;
 import okhttp3.ResponseBody;
 import retrofit2.Response;
 import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Func1;
 import rx.functions.Func3;
 import rx.schedulers.Schedulers;
@@ -34,7 +36,7 @@ import rx.subjects.PublishSubject;
 public class LoginViewModel extends ActivityViewModel<LoginActivity> implements LoginViewModelInputs, LoginViewModelOutputs, LoginViewModelErrors {
     private static final String TAG = LoginViewModel.class.getSimpleName();
 
-    private NgaApiService service;
+    private NgaApiClientType client;
 
     private String authcodeCookie;
 
@@ -44,7 +46,7 @@ public class LoginViewModel extends ActivityViewModel<LoginActivity> implements 
 
     public LoginViewModel(@NonNull Environment environment) {
         super(environment);
-        service = environment.apiClient();
+        client = environment.apiClient();
 
         final Observable<AuthInfoEnvelope> authInfoEnvelope = Observable.combineLatest(username, password, vcode, new Func3<String, String, String, AuthInfoEnvelope>() {
             @Override
@@ -66,29 +68,24 @@ public class LoginViewModel extends ActivityViewModel<LoginActivity> implements 
             .compose(this.<Boolean>bindToLifecycle())
             .subscribe(setLoginButtonIsEnabled);
 
-
-        service.fetchRegCode("gen_reg")
-            .compose(this.<Response<ResponseBody>>bindToLifecycle())
-            .map(new Func1<Response<ResponseBody>, Bitmap>() {
+        authInfoEnvelope
+            .compose(Transformers.<AuthInfoEnvelope, View>takeWhen(loginClick))
+            .switchMap(new Func1<AuthInfoEnvelope, Observable<Void>>() {
                 @Override
-                public Bitmap call(Response<ResponseBody> response) {
-                    okhttp3.Response rawResponse = response.raw();
-                    if (!rawResponse.headers("set-cookie").isEmpty()) {
-                        List<String> cookies = rawResponse.headers("set-cookie");
-                        for (String cookie : cookies) {
-//                                Logger.t(TAG).d("one cookie: " + cookie);
-                            cookie = cookie.substring(0, cookie.indexOf(';'));
-//                                Logger.t(TAG).d("cookie:" + cookie);
-                            if (cookie.indexOf("reg_vcode=") == 0 && cookie.indexOf("deleted") < 0) {
-                                authcodeCookie = cookie.substring(10);
-                                Logger.t(TAG).d("authcodeCookie:" + authcodeCookie);
-                            }
-                        }
-                    }
-                    return BitmapFactory.decodeStream(response.body().byteStream());
+                public Observable<Void> call(AuthInfoEnvelope authInfoEnvelope) {
+                    return submit(authInfoEnvelope);
+                }
+            });
+
+        client.fetchVerificationCode()
+            .compose(this.<VCodeEnvelope>bindToLifecycle())
+            .map(new Func1<VCodeEnvelope, Bitmap>() {
+                @Override
+                public Bitmap call(VCodeEnvelope vCodeEnvelope) {
+                    authcodeCookie = vCodeEnvelope.vCode;
+                    return vCodeEnvelope.vCodeImage;
                 }
             })
-            .subscribeOn(Schedulers.io())
             .subscribe(setVerificationCode);
     }
 
@@ -96,10 +93,15 @@ public class LoginViewModel extends ActivityViewModel<LoginActivity> implements 
     private final PublishSubject<String> username = PublishSubject.create();
     private final PublishSubject<String> password = PublishSubject.create();
     private final PublishSubject<String> vcode = PublishSubject.create();
+    private final PublishSubject<View> loginClick = PublishSubject.create();
 
     private final BehaviorSubject<Bitmap> setVerificationCode = BehaviorSubject.create();
 
     private final BehaviorSubject<Boolean> setLoginButtonIsEnabled = BehaviorSubject.create();
+
+    private Observable<Void> submit(AuthInfoEnvelope authInfoEnvelope) {
+        return null;
+    }
 
     @Override
     public Observable<Boolean> setLoginButtonIsEnabled() {
@@ -125,6 +127,13 @@ public class LoginViewModel extends ActivityViewModel<LoginActivity> implements 
     public void vcode(String v) {
         vcode.onNext(v);
     }
+
+    @Override
+    public void loginClick() {
+        loginClick.onNext(null);
+    }
+
+
 
     class AuthInfoEnvelope {
         final String username;

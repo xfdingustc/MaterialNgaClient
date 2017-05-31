@@ -15,8 +15,6 @@ import rx.Observable;
  */
 
 public interface NgaApiService {
-    @GET("q_vcode.php")
-    Observable<ResponseBody> getRegCode(@Query("_act") String action);
 
     @GET("q_vcode.php")
     Observable<Response<ResponseBody>> fetchRegCode(@Query("_act") String action);

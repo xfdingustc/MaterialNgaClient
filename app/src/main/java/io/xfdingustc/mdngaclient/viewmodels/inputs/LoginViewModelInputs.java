@@ -10,4 +10,6 @@ public interface LoginViewModelInputs {
     void password(String __);
 
     void vcode(String __);
+
+    void loginClick();
 }
