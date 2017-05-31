@@ -1,6 +1,8 @@
 package io.xfdingustc.mdngaclient.rest;
 
+
 import okhttp3.ResponseBody;
+import retrofit2.Response;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.Headers;
@@ -15,6 +17,9 @@ import rx.Observable;
 public interface INgaApi {
     @GET("q_vcode.php")
     Observable<ResponseBody> getRegCode(@Query("_act") String action);
+
+    @GET("q_vcode.php")
+    Observable<Response<ResponseBody>> fetchRegCode(@Query("_act") String action);
 
 
     @Headers("Content-Type: application/x-www-form-urlencoded")

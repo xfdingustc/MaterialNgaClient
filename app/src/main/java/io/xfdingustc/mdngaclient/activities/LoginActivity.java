@@ -46,10 +46,12 @@ import okhttp3.Headers;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import okhttp3.Response;
+
 import okhttp3.ResponseBody;
+import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
+import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.converter.scalars.ScalarsConverterFactory;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
@@ -144,8 +146,8 @@ public class LoginActivity extends BaseActivity<LoginViewModel> implements Perfe
         }
         name = userText.getText().toString();
         if (StringUtil.isEmpty(name) ||
-                StringUtil.isEmpty(passwordText.getText().toString()) ||
-                StringUtil.isEmpty(authcodeText.getText().toString())) {
+            StringUtil.isEmpty(passwordText.getText().toString()) ||
+            StringUtil.isEmpty(authcodeText.getText().toString())) {
             showToast("内容缺少，请检查后再试");
             reloadAuthCode();
             return;
@@ -171,7 +173,7 @@ public class LoginActivity extends BaseActivity<LoginViewModel> implements Perfe
         super.onCreate(savedInstanceState);
         int orentation = ThemeManager.getInstance().screenOrentation;
         if (orentation == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
-                || orentation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT) {
+            || orentation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT) {
             setRequestedOrientation(orentation);
         } else {
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
@@ -245,61 +247,47 @@ public class LoginActivity extends BaseActivity<LoginViewModel> implements Perfe
         authcodeImg.setImageDrawable(getResources().getDrawable(R.drawable.q_vcode));
 
         OkHttpClient.Builder clientBuilder = new OkHttpClient.Builder()
-                .addInterceptor(new Interceptor() {
-                    @Override
-                    public Response intercept(Chain chain) throws IOException {
-                        Request request = chain.request();
-                        Response response = chain.proceed(request);
+            .readTimeout(15000, TimeUnit.MILLISECONDS)
+            .connectTimeout(15000, TimeUnit.MILLISECONDS);
 
-                        if (!response.headers("set-cookie").isEmpty()) {
-                            List<String> cookies = response.headers("set-cookie");
-                            for (String cookie : cookies) {
-//                                Logger.t(TAG).d("one cookie: " + cookie);
-                                cookie = cookie.substring(0, cookie.indexOf(';'));
-//                                Logger.t(TAG).d("cookie:" + cookie);
-                                if (cookie.indexOf("reg_vcode=") == 0 && cookie.indexOf("deleted") < 0) {
-                                    authcodeCookie = cookie.substring(10);
-                                    Logger.t(TAG).d("authcodeCookie:" + authcodeCookie);
-                                }
-                            }
-                        }
-                        return response;
-                    }
-                })
-                .readTimeout(15000, TimeUnit.MILLISECONDS)
-                .connectTimeout(15000, TimeUnit.MILLISECONDS);
 
         new Retrofit.Builder()
-                .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
-                .baseUrl(Consts.BASE_URL)
-                .client(clientBuilder.build())
-                .build()
-                .create(INgaApi.class)
-                .getRegCode("gen_reg")
-                .map(new Func1<ResponseBody, Bitmap>() {
-                    @Override
-                    public Bitmap call(ResponseBody responseBody) {
-                        return BitmapFactory.decodeStream(responseBody.byteStream());
+            .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
+            .baseUrl(Consts.BASE_URL)
+            .client(clientBuilder.build())
+            .build()
+            .create(INgaApi.class)
+            .fetchRegCode("gen_reg")
+            .map(new Func1<Response<ResponseBody>, Bitmap>() {
+                @Override
+                public Bitmap call(Response<ResponseBody> response) {
+                    okhttp3.Response rawResponse = response.raw();
+                    if (!rawResponse.headers("set-cookie").isEmpty()) {
+                        List<String> cookies = rawResponse.headers("set-cookie");
+                        for (String cookie : cookies) {
+//                                Logger.t(TAG).d("one cookie: " + cookie);
+                            cookie = cookie.substring(0, cookie.indexOf(';'));
+//                                Logger.t(TAG).d("cookie:" + cookie);
+                            if (cookie.indexOf("reg_vcode=") == 0 && cookie.indexOf("deleted") < 0) {
+                                authcodeCookie = cookie.substring(10);
+                                Logger.t(TAG).d("authcodeCookie:" + authcodeCookie);
+                            }
+                        }
                     }
-                })
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new SimpleSubscriber<Bitmap>() {
-                    @Override
-                    public void onError(Throwable e) {
-                        Logger.t(TAG).d("on error " + e.toString());
-                        authcodefinishLoadError();
-                    }
+                    return BitmapFactory.decodeStream(response.body().byteStream());
+                }
+            })
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(new SimpleSubscriber<Bitmap>() {
+                @Override
+                public void onNext(Bitmap bitmap) {
+                    authcodeImg.setImageBitmap(bitmap);
+                }
+            });
 
-                    @Override
-                    public void onNext(Bitmap bitmap) {
-                        authcodeImg.setImageBitmap(bitmap);
-                    }
-                });
 
     }
-
-
 
 
     @Override
@@ -324,52 +312,52 @@ public class LoginActivity extends BaseActivity<LoginViewModel> implements Perfe
 
     private void doLogin(String postBody) {
         OkHttpClient.Builder clientBuilder = new OkHttpClient.Builder()
-                .addInterceptor(new Interceptor() {
-                    @Override
-                    public Response intercept(Chain chain) throws IOException {
-                        Request request = chain.request();
-                        Request.Builder requestBuilder = request.newBuilder();
-                        requestBuilder.addHeader("Cookie", "reg_vcode=" + authcodeCookie);
-                        final Response response = chain.proceed(requestBuilder.build());
+            .addInterceptor(new Interceptor() {
+                @Override
+                public okhttp3.Response intercept(Chain chain) throws IOException {
+                    Request request = chain.request();
+                    Request.Builder requestBuilder = request.newBuilder();
+                    requestBuilder.addHeader("Cookie", "reg_vcode=" + authcodeCookie);
+                    final okhttp3.Response response = chain.proceed(requestBuilder.build());
 
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                if (!validateLoginInfo(response)) {
-                                    reloadAuthCode();
-                                }
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (!validateLoginInfo(response)) {
+                                reloadAuthCode();
                             }
-                        });
+                        }
+                    });
 
 
-                        return response;
-                    }
-                })
-                .addInterceptor(new HttpLogInterceptor())
-                .followRedirects(false)
-                .readTimeout(15000, TimeUnit.MILLISECONDS)
-                .connectTimeout(15000, TimeUnit.MILLISECONDS);
+                    return response;
+                }
+            })
+            .addInterceptor(new HttpLogInterceptor())
+            .followRedirects(false)
+            .readTimeout(15000, TimeUnit.MILLISECONDS)
+            .connectTimeout(15000, TimeUnit.MILLISECONDS);
 
         new Retrofit.Builder()
-                .addConverterFactory(ScalarsConverterFactory.create())
-                .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
-                .baseUrl(Consts.BASE_URL)
-                .client(clientBuilder.build())
-                .build()
-                .create(INgaApi.class)
-                .login(postBody)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new SimpleSubscriber<ResponseBody>() {
-                    @Override
-                    public void onNext(ResponseBody response) {
+            .addConverterFactory(ScalarsConverterFactory.create())
+            .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
+            .baseUrl(Consts.BASE_URL)
+            .client(clientBuilder.build())
+            .build()
+            .create(INgaApi.class)
+            .login(postBody)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(new SimpleSubscriber<ResponseBody>() {
+                @Override
+                public void onNext(ResponseBody response) {
 //                        Logger.t(TAG).d("Response body: " + response.toString());
 
-                    }
-                });
+                }
+            });
     }
 
-    private boolean validateLoginInfo(Response response) {
+    private boolean validateLoginInfo(okhttp3.Response response) {
         String key, value;
         Headers headers = response.headers();
         String cid = "", uid = "";
@@ -431,10 +419,10 @@ public class LoginActivity extends BaseActivity<LoginViewModel> implements Perfe
         showToast(R.string.login_successfully);
         SharedPreferences share = getSharedPreferences(PERFERENCE, MODE_MULTI_PROCESS);
         Editor editor = share.edit().putString(UID, uid)
-                .putString(CID, cid).putString(PENDING_REPLYS, "")
-                .putString(REPLYTOTALNUM, "0")
-                .putString(USER_NAME, name)
-                .putString(BLACK_LIST, "");
+            .putString(CID, cid).putString(PENDING_REPLYS, "")
+            .putString(REPLYTOTALNUM, "0")
+            .putString(USER_NAME, name)
+            .putString(BLACK_LIST, "");
         editor.apply();
         MdNgaApplication app = (MdNgaApplication) getApplication();
         app.addToUserList(uid, cid, name, "", 0, "");
@@ -445,7 +433,7 @@ public class LoginActivity extends BaseActivity<LoginViewModel> implements Perfe
         PhoneConfiguration.getInstance().setReplyTotalNum(0);
         PhoneConfiguration.getInstance().setReplyString("");
         PhoneConfiguration.getInstance().blacklist = StringUtil
-                .blackliststringtolisttohashset("");
+            .blackliststringtolisttohashset("");
         alreadylogin = true;
         Intent intent = new Intent();
         if (needtopost) {
