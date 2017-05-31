@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.CallSuper;
 import android.support.annotation.LayoutRes;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -15,6 +16,8 @@ import com.trello.rxlifecycle.components.RxActivity;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import gov.anzong.androidnga.R;
+import io.xfdingustc.mdngaclient.ApplicationComponent;
+import io.xfdingustc.mdngaclient.app.MdNgaApplication;
 import io.xfdingustc.mdngaclient.libs.qualifiers.RequiresActivityViewModel;
 import io.xfdingustc.mdngaclient.libs.utils.BundleUtils;
 import rx.Observable;
@@ -134,6 +137,22 @@ public abstract class BaseActivity<ViewModelType extends ActivityViewModel> exte
                 viewModel = null;
             }
         }
+    }
+
+    @NonNull
+    protected MdNgaApplication application() {
+        return (MdNgaApplication)getApplication();
+    }
+
+
+    @NonNull
+    protected ApplicationComponent component() {
+        return application().component();
+    }
+
+    @NonNull
+    protected Environment environment() {
+        return component().environment();
     }
 
 

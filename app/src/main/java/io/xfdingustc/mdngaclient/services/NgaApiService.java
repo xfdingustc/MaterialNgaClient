@@ -1,4 +1,4 @@
-package io.xfdingustc.mdngaclient.rest;
+package io.xfdingustc.mdngaclient.services;
 
 
 import okhttp3.ResponseBody;
@@ -14,7 +14,7 @@ import rx.Observable;
  * Created by whaley on 2017/5/11.
  */
 
-public interface INgaApi {
+public interface NgaApiService {
     @GET("q_vcode.php")
     Observable<ResponseBody> getRegCode(@Query("_act") String action);
 

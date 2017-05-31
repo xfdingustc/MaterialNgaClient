@@ -8,14 +8,13 @@ import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+
 import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
 import android.text.TextUtils;
-import android.view.Menu;
 
 import android.view.WindowManager;
 import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 
@@ -35,12 +34,12 @@ import butterknife.OnTextChanged;
 import io.xfdingustc.mdngaclient.app.Consts;
 import io.xfdingustc.mdngaclient.app.MdNgaApplication;
 import io.xfdingustc.mdngaclient.libs.BaseActivity;
+import io.xfdingustc.mdngaclient.libs.Environment;
 import io.xfdingustc.mdngaclient.libs.qualifiers.RequiresActivityViewModel;
 import io.xfdingustc.mdngaclient.libs.rx.Transformers;
-import io.xfdingustc.mdngaclient.rest.INgaApi;
+import io.xfdingustc.mdngaclient.services.NgaApiService;
 import io.xfdingustc.mdngaclient.libs.rx.SimpleSubscriber;
 import gov.anzong.androidnga.R;
-import gov.anzong.androidnga.activity.SwipeBackAppCompatActivity;
 import io.xfdingustc.mdngaclient.viewmodels.LoginViewModel;
 import okhttp3.Headers;
 import okhttp3.Interceptor;
@@ -51,7 +50,6 @@ import okhttp3.ResponseBody;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
-import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.converter.scalars.ScalarsConverterFactory;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
@@ -60,11 +58,8 @@ import rx.schedulers.Schedulers;
 import sp.phone.adapter.UserListAdapter;
 import sp.phone.bean.PerferenceConstant;
 import sp.phone.utils.PhoneConfiguration;
-import sp.phone.utils.ReflectionUtil;
 import sp.phone.utils.StringUtil;
 import sp.phone.utils.ThemeManager;
-
-import static io.xfdingustc.mdngaclient.libs.rx.Transformers.observerForUI;
 
 @RequiresActivityViewModel(LoginViewModel.class)
 public class LoginActivity extends BaseActivity<LoginViewModel> implements PerferenceConstant {
@@ -180,6 +175,7 @@ public class LoginActivity extends BaseActivity<LoginViewModel> implements Perfe
         }
 //        ThemeManager.SetContextTheme(this);
 
+
         initViews();
 
         viewModel.outputs.setLoginButtonIsEnabled()
@@ -246,18 +242,12 @@ public class LoginActivity extends BaseActivity<LoginViewModel> implements Perfe
 
         authcodeImg.setImageDrawable(getResources().getDrawable(R.drawable.q_vcode));
 
-        OkHttpClient.Builder clientBuilder = new OkHttpClient.Builder()
-            .readTimeout(15000, TimeUnit.MILLISECONDS)
-            .connectTimeout(15000, TimeUnit.MILLISECONDS);
+
+        final Environment environment = environment();
+        NgaApiService service = environment.apiClient();
 
 
-        new Retrofit.Builder()
-            .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
-            .baseUrl(Consts.BASE_URL)
-            .client(clientBuilder.build())
-            .build()
-            .create(INgaApi.class)
-            .fetchRegCode("gen_reg")
+        service.fetchRegCode("gen_reg")
             .map(new Func1<Response<ResponseBody>, Bitmap>() {
                 @Override
                 public Bitmap call(Response<ResponseBody> response) {
@@ -344,7 +334,7 @@ public class LoginActivity extends BaseActivity<LoginViewModel> implements Perfe
             .baseUrl(Consts.BASE_URL)
             .client(clientBuilder.build())
             .build()
-            .create(INgaApi.class)
+            .create(NgaApiService.class)
             .login(postBody)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())

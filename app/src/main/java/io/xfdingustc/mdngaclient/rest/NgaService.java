@@ -3,6 +3,7 @@ package io.xfdingustc.mdngaclient.rest;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
+import io.xfdingustc.mdngaclient.services.NgaApiService;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -16,13 +17,13 @@ import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 
 public class NgaService {
     public static final int TIME_OUT_MILLI_SEC = 15000;
-    public static INgaApi mNgaApiInstance = null;
+    public static NgaApiService mNgaApiInstance = null;
 
     private NgaService() {
 
     }
 
-    public static INgaApi createNgaApiService() {
+    public static NgaApiService createNgaApiService() {
         if (mNgaApiInstance == null) {
             synchronized (NgaService.class) {
                 if (mNgaApiInstance == null) {
@@ -52,7 +53,7 @@ public class NgaService {
 
                     builder.client(clientBuilder.build());
 
-                    mNgaApiInstance = builder.build().create(INgaApi.class);
+                    mNgaApiInstance = builder.build().create(NgaApiService.class);
                 }
             }
         }
