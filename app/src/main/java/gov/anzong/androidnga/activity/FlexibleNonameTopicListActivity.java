@@ -62,7 +62,7 @@ public class FlexibleNonameTopicListActivity extends SwipeBackAppCompatActivity
     @Override
     protected void onCreate(Bundle arg0) {
         super.onCreate(arg0);
-        view = LayoutInflater.from(this).inflate(R.layout.topiclist_activity,
+        view = LayoutInflater.from(this).inflate(R.layout.activity_topiclist,
                 null);
         getSupportActionBar().setTitle("大漩涡匿名版");
         Intent intent = getIntent();

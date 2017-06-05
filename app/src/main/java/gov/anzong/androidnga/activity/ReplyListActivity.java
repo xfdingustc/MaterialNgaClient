@@ -16,7 +16,7 @@ public class ReplyListActivity extends SwipeBackAppCompatActivity {
     protected void onCreate(Bundle arg0) {
         super.onCreate(arg0);
         getSupportActionBar().setTitle("我的被喷");
-        this.setContentView(R.layout.topiclist_activity);
+        this.setContentView(R.layout.activity_topiclist);
         FragmentManager fm = this.getSupportFragmentManager();
         Fragment f = fm.findFragmentById(R.id.item_list);
         if (f == null) {

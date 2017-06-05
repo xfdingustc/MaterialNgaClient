@@ -10,14 +10,14 @@ import android.nfc.NdefRecord;
 import android.nfc.NfcAdapter;
 import android.nfc.NfcAdapter.CreateNdefMessageCallback;
 import android.nfc.NfcEvent;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBar.OnNavigationListener;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -28,6 +28,10 @@ import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
 import android.widget.HeaderViewListAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 
 import gov.anzong.androidnga.R;
 import gov.anzong.androidnga.activity.SwipeBackAppCompatActivity;
@@ -40,6 +44,7 @@ import sp.phone.bean.TopicListInfo;
 import sp.phone.fragment.ArticleContainerFragment;
 import sp.phone.fragment.TopicListContainer;
 import sp.phone.interfaces.EnterJsonArticle;
+import sp.phone.interfaces.NextJsonTopicListLoader;
 import sp.phone.interfaces.OnChildFragmentRemovedListener;
 import sp.phone.interfaces.OnThreadPageLoadFinishedListener;
 import sp.phone.interfaces.OnTopListLoadFinishedListener;
@@ -47,7 +52,9 @@ import sp.phone.interfaces.PagerOwnner;
 import sp.phone.interfaces.PullToRefreshAttacherOnwer;
 import sp.phone.task.CheckReplyNotificationTask;
 import sp.phone.task.DeleteBookmarkTask;
+import sp.phone.task.JsonTopicListLoadTask;
 import sp.phone.utils.ActivityUtil;
+import sp.phone.utils.HttpUtil;
 import sp.phone.utils.PhoneConfiguration;
 import sp.phone.utils.ReflectionUtil;
 import sp.phone.utils.StringUtil;
@@ -63,21 +70,22 @@ public class FlexibleTopicListActivity extends SwipeBackAppCompatActivity
     OnChildFragmentRemovedListener, PullToRefreshAttacherOnwer,
     OnItemLongClickListener,
     ArticleContainerFragment.OnArticleContainerFragmentListener,
-    TopicListContainer.OnTopicListContainerListener {
-
+    TopicListContainer.OnTopicListContainerListener, NextJsonTopicListLoader {
+    int fid;
+    private AppendableTopicAdapter adapter;
     boolean dualScreen = true;
     String strs[] = {"全部", "精华", "推荐"};
     ArrayAdapter<String> categoryAdapter;
     int flags = 7;
     int toDeleteTid = 0;
     TopicListInfo result = null;
-    View view;
     int nightmode;
     String guidtmp;
     int authorid;
     int searchpost;
     int favor;
     int content;
+    private TopicListInfo mTopicListInfo;
     String key;
     //	String table;
     String fidgroup;
@@ -87,6 +95,9 @@ public class FlexibleTopicListActivity extends SwipeBackAppCompatActivity
     private CheckReplyNotificationTask asynTask;
     private PullToRefreshAttacher mPullToRefreshAttacher;
     private OnItemClickListener onItemClickNewActivity = null;
+    int category = 0;
+    private ListView listView;
+    private FloatingActionButton mFab;
 
     private int getUrlParameter(String url, String paraName) {
         if (StringUtil.isEmpty(url)) {
@@ -114,13 +125,9 @@ public class FlexibleTopicListActivity extends SwipeBackAppCompatActivity
     @Override
     protected void onCreate(Bundle arg0) {
         super.onCreate(arg0);
-        view = LayoutInflater.from(this).inflate(R.layout.topiclist_activity, null);
         Intent intent = getIntent();
-        boolean isfullScreen = intent.getBooleanExtra("isFullScreen", false);
-        if (isfullScreen) {
-            ActivityUtil.getInstance().setFullScreen(view);
-        }
-        this.setContentView(view);
+
+        setContentView(R.layout.activity_topiclist);
         nightmode = ThemeManager.getInstance().getMode();
 //        PullToRefreshAttacher.Options options = new PullToRefreshAttacher.Options();
 //        options.refreshScrollDistance = 0.3f;
@@ -133,8 +140,8 @@ public class FlexibleTopicListActivity extends SwipeBackAppCompatActivity
         if (null == findViewById(R.id.item_detail_container)) {
             dualScreen = false;
         }
-        FragmentManager fm = getSupportFragmentManager();
-        Fragment f1 = fm.findFragmentById(R.id.item_list);
+//        FragmentManager fm = getSupportFragmentManager();
+//        Fragment f1 = fm.findFragmentById(R.id.item_list);
 
         String url = getIntent().getDataString();
         if (url != null) {
@@ -168,28 +175,32 @@ public class FlexibleTopicListActivity extends SwipeBackAppCompatActivity
             || !StringUtil.isEmpty(fidgroup)) {//!StringUtil.isEmpty(table) ||
             fromreplyactivity = true;
         }
-        if (f1 == null) {
-            f1 = new TopicListContainer();
-            Bundle args = new Bundle();// (getIntent().getExtras());
-            if (null != getIntent().getExtras()) {
-                args.putAll(getIntent().getExtras());
-            }
-            args.putString("url", getIntent().getDataString());
-            f1.setArguments(args);
-            FragmentTransaction ft = fm.beginTransaction().add(R.id.item_list, f1);
-            ft.commit();
-        }
-        Fragment f2 = fm.findFragmentById(R.id.item_detail_container);
-        if (null == f2) {
-            f1.setHasOptionsMenu(true);
-        } else if (!dualScreen) {
-            getSupportActionBar().setTitle("主题列表");
-            fm.beginTransaction().remove(f2).commit();
-            f1.setHasOptionsMenu(true);
-        } else {
-            f1.setHasOptionsMenu(false);
-            f2.setHasOptionsMenu(true);
-        }
+
+
+//        if (f1 == null) {
+//            f1 = new TopicListContainer();
+//            Bundle args = new Bundle();// (getIntent().getExtras());
+//            if (null != getIntent().getExtras()) {
+//                args.putAll(getIntent().getExtras());
+//            }
+//            args.putString("url", getIntent().getDataString());
+//            f1.setArguments(args);
+//            FragmentTransaction ft = fm.beginTransaction().add(R.id.item_list, f1);
+//            ft.commit();
+//        }
+//        Fragment f2 = fm.findFragmentById(R.id.item_detail_container);
+//        if (null == f2) {
+//            f1.setHasOptionsMenu(true);
+//        } else if (!dualScreen) {
+//            getSupportActionBar().setTitle("主题列表");
+//            fm.beginTransaction().remove(f2).commit();
+//            f1.setHasOptionsMenu(true);
+//        } else {
+//            f1.setHasOptionsMenu(false);
+//            f2.setHasOptionsMenu(true);
+//        }
+
+        onFragmentCreated();
 
         int fid = getIntent().getIntExtra("fid", 0);
         if (fid != 0) {
@@ -244,6 +255,92 @@ public class FlexibleTopicListActivity extends SwipeBackAppCompatActivity
             }
         }
 
+    }
+
+    private void onFragmentCreated() {
+
+        listView = (ListView) findViewById(R.id.topic_list);
+        mFab = (FloatingActionButton) findViewById(R.id.fab);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            listView.setNestedScrollingEnabled(true);
+        }
+        adapter = new AppendableTopicAdapter(this, null, this);
+        listView.setAdapter(adapter);
+        try {
+            OnItemClickListener listener = (OnItemClickListener) this;
+            listView.setOnItemClickListener(listener);
+        } catch (ClassCastException e) {
+            Log.e(TAG, "father activity should implenent OnItemClickListener");
+        }
+        mFab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+//                refresh();
+            }
+        });
+
+        refresh();
+
+
+        fid = 0;
+        authorid = 0;
+
+
+    }
+
+    private void refresh() {
+        JsonTopicListLoadTask task = new JsonTopicListLoadTask(this, this);
+        task.execute(getUrl(1, true, true));
+    }
+
+    public String getUrl(int page, boolean isend, boolean restart) {
+        String jsonUri = HttpUtil.Server + "/thread.php?";
+        if (0 != authorid)
+            jsonUri += "authorid=" + authorid + "&";
+        if (searchpost != 0)
+            jsonUri += "searchpost=" + searchpost + "&";
+        if (favor != 0)
+            jsonUri += "favor=" + favor + "&";
+        if (content != 0)
+            jsonUri += "content=" + content + "&";
+
+        if (!StringUtil.isEmpty(author)) {
+            try {
+                if (author.endsWith("&searchpost=1")) {
+                    jsonUri += "author="
+                        + URLEncoder.encode(
+                        author.substring(0, author.length() - 13),
+                        "GBK") + "&searchpost=1&";
+                } else {
+                    jsonUri += "author="
+                        + URLEncoder.encode(author, "GBK") + "&";
+                }
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+        } else {
+            if (0 != fid)
+                jsonUri += "fid=" + fid + "&";
+            if (!StringUtil.isEmpty(key)) {
+                jsonUri += "key=" + StringUtil.encodeUrl(key, "UTF-8") + "&";
+            }
+            if (!StringUtil.isEmpty(fidgroup)) {
+                jsonUri += "fidgroup=" + fidgroup + "&";
+            }
+        }
+        jsonUri += "page=" + page + "&lite=js&noprefix";
+        switch (category) {
+            case 2:
+                jsonUri += "&recommend=1&order_by=postdatedesc&admin=1";
+                break;
+            case 1:
+                jsonUri += "&recommend=1&order_by=postdatedesc&user=1";
+                break;
+            case 0:
+            default:
+        }
+
+        return jsonUri;
     }
 
     @Override
@@ -328,12 +425,7 @@ public class FlexibleTopicListActivity extends SwipeBackAppCompatActivity
             invalidateOptionsMenu();
             nightmode = ThemeManager.getInstance().getMode();
         }
-        int orientation = ThemeManager.getInstance().screenOrentation;
-        if (orientation == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE || orientation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT) {
-            setRequestedOrientation(orientation);
-        } else {
-            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
-        }
+
 
         if (asynTask != null) {
             asynTask.cancel(true);
@@ -346,26 +438,40 @@ public class FlexibleTopicListActivity extends SwipeBackAppCompatActivity
             asynTask = new CheckReplyNotificationTask(this);
             asynTask.execute(config.getCookie());
         }
-        if (PhoneConfiguration.getInstance().fullscreen) {
-            ActivityUtil.getInstance().setFullScreen(view);
-        }
         super.onResume();
     }
 
     @Override
     public void jsonfinishLoad(TopicListInfo result) {
-        Fragment topicContainer = getSupportFragmentManager().findFragmentById(R.id.item_list);
-        if (!result.get__SEARCHNORESULT()) {
-            this.result = result;
+        if (result == null)
+            return;
+
+        mTopicListInfo = result;
+        if (result.get__SEARCHNORESULT()) {
+
+                Toast.makeText(this, "结果已搜索完毕",
+                    Toast.LENGTH_SHORT).show();
+            return;
         }
-        OnTopListLoadFinishedListener listener = null;
-        try {
-            listener = (OnTopListLoadFinishedListener) topicContainer;
-            if (listener != null)
-                listener.jsonfinishLoad(result);
-        } catch (ClassCastException e) {
-            Log.e(TAG, "topicContainer should implements " + OnTopListLoadFinishedListener.class.getCanonicalName());
+        int lines = 35;
+        if (authorid != 0)
+            lines = 20;
+        int pageCount = result.get__ROWS() / lines;
+        if (pageCount * lines < result.get__ROWS())
+            pageCount++;
+
+        if (searchpost != 0)// can not get exact row counts
+        {
+            int page = result.get__ROWS();
+            pageCount = page;
+            if (result.get__T__ROWS() == lines)
+                pageCount++;
         }
+
+        adapter.clear();
+        adapter.jsonfinishLoad(result);
+        listView.setAdapter(adapter);
+
     }
 
     @Override
@@ -554,7 +660,7 @@ public class FlexibleTopicListActivity extends SwipeBackAppCompatActivity
         if (f2 != null) {
             ((ArticleContainerFragment) f2).changemode();
         } else {
-            FrameLayout v = (FrameLayout) view.findViewById(R.id.item_detail_container);
+            FrameLayout v = (FrameLayout) findViewById(R.id.item_detail_container);
             if (v != null) {
                 if (ThemeManager.getInstance().getMode() == ThemeManager.MODE_NIGHT) {
                     v.setBackgroundResource(R.color.night_bg_color);
@@ -563,5 +669,13 @@ public class FlexibleTopicListActivity extends SwipeBackAppCompatActivity
                 }
             }
         }
+    }
+
+    @Override
+    public void loadNextPage(OnTopListLoadFinishedListener callback) {
+        JsonTopicListLoadTask task = new JsonTopicListLoadTask(this, callback);
+//        refresh_saying();
+
+        task.execute(getUrl(adapter.getNextPage(), adapter.getIsEnd(), false));
     }
 }
