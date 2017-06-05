@@ -1,4 +1,4 @@
-package io.xfdingustc.mdngaclient.activities;
+package io.xfdingustc.mdngaclient.ui.activities;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -9,50 +9,25 @@ import android.os.Bundle;
 
 import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
-import android.text.TextUtils;
 
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.Toast;
-
-import com.halcyon.logger.HttpLogInterceptor;
-import com.orhanobut.logger.Logger;
-
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
-import java.util.concurrent.TimeUnit;
 
 import butterknife.BindString;
 import butterknife.BindView;
 import butterknife.OnClick;
 import butterknife.OnTextChanged;
-import io.xfdingustc.mdngaclient.app.Consts;
 import io.xfdingustc.mdngaclient.app.MdNgaApplication;
 import io.xfdingustc.mdngaclient.libs.BaseActivity;
 import io.xfdingustc.mdngaclient.libs.qualifiers.RequiresActivityViewModel;
 import io.xfdingustc.mdngaclient.libs.rx.transformers.Transformers;
 import io.xfdingustc.mdngaclient.services.LoginException;
-import io.xfdingustc.mdngaclient.services.NgaApiService;
-import io.xfdingustc.mdngaclient.libs.rx.SimpleSubscriber;
 import gov.anzong.androidnga.R;
 import io.xfdingustc.mdngaclient.services.apiresponses.ErrorEnvelope;
 import io.xfdingustc.mdngaclient.viewmodels.LoginViewModel;
-import okhttp3.Headers;
-import okhttp3.Interceptor;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
 
-import okhttp3.ResponseBody;
-import retrofit2.Retrofit;
-import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
-import retrofit2.converter.scalars.ScalarsConverterFactory;
-import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
-import rx.schedulers.Schedulers;
 import sp.phone.adapter.UserListAdapter;
 import sp.phone.bean.PerferenceConstant;
 import sp.phone.utils.PhoneConfiguration;

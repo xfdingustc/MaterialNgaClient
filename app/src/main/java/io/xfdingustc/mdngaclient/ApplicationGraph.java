@@ -1,10 +1,10 @@
 package io.xfdingustc.mdngaclient;
 
 
-import io.xfdingustc.mdngaclient.activities.LoginActivity;
+import io.xfdingustc.mdngaclient.ui.activities.LoginActivity;
 import io.xfdingustc.mdngaclient.app.MdNgaApplication;
 import io.xfdingustc.mdngaclient.libs.Environment;
-import io.xfdingustc.mdngaclient.activities.MainActivity;
+import io.xfdingustc.mdngaclient.ui.activities.MainActivity;
 
 /**
  * Created by whaley on 2017/5/17.

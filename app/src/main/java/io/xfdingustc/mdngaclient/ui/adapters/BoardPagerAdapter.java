@@ -1,4 +1,4 @@
-package sp.phone.adapter;
+package io.xfdingustc.mdngaclient.ui.adapters;
 
 
 import android.app.Fragment;
@@ -6,7 +6,7 @@ import android.app.FragmentManager;
 import android.support.v13.app.FragmentStatePagerAdapter;
 import android.view.ViewGroup;
 
-import sp.phone.fragment.BoardPagerFragment;
+import io.xfdingustc.mdngaclient.ui.fragments.BoardPagerFragment;
 import sp.phone.interfaces.PageCategoryOwnner;
 
 public class BoardPagerAdapter extends FragmentStatePagerAdapter {

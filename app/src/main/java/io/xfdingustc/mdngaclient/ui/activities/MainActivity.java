@@ -1,4 +1,4 @@
-package io.xfdingustc.mdngaclient.activities;
+package io.xfdingustc.mdngaclient.ui.activities;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -14,7 +14,6 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -76,7 +75,7 @@ import gov.anzong.androidnga.Utils;
 import gov.anzong.androidnga.activity.NearbyUserActivity;
 import gov.anzong.androidnga.activity.SettingsActivity;
 import rx.functions.Action1;
-import sp.phone.adapter.BoardPagerAdapter;
+import io.xfdingustc.mdngaclient.ui.adapters.BoardPagerAdapter;
 import sp.phone.bean.AvatarTag;
 import sp.phone.bean.Board;
 import sp.phone.bean.BoardCategory;
@@ -298,13 +297,6 @@ public class MainActivity extends BaseActivity<MainViewModel> implements Perfere
         tabLayout.setupWithViewPager(viewPager);
     }
 
-
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        // Pass any configuration change to the drawer toggls
-//        mDrawerToggle.onConfigurationChanged(newConfig);
-    }
 
 
     private void search_profile() {

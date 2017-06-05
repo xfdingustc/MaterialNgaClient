@@ -1,14 +1,11 @@
 package io.xfdingustc.mdngaclient.viewmodels;
 
 import android.graphics.Bitmap;
-import android.icu.text.IDNA;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.view.View;
 
-import com.orhanobut.logger.Logger;
-
-import io.xfdingustc.mdngaclient.activities.LoginActivity;
+import io.xfdingustc.mdngaclient.ui.activities.LoginActivity;
 import io.xfdingustc.mdngaclient.libs.ActivityViewModel;
 import io.xfdingustc.mdngaclient.libs.Environment;
 import io.xfdingustc.mdngaclient.libs.rx.transformers.Transformers;

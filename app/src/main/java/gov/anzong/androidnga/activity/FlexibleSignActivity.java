@@ -16,6 +16,7 @@ import android.widget.ArrayAdapter;
 
 import io.xfdingustc.mdngaclient.app.MdNgaApplication;
 import gov.anzong.androidnga.R;
+import io.xfdingustc.mdngaclient.ui.activities.FlexibleTopicListActivity;
 import sp.phone.adapter.ActionBarUserListAdapter;
 import sp.phone.adapter.SpinnerUserListAdapter;
 import sp.phone.bean.SignData;

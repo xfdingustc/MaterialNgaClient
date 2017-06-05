@@ -1,4 +1,4 @@
-package sp.phone.fragment;
+package io.xfdingustc.mdngaclient.ui.fragments;
 
 import android.app.Fragment;
 import android.os.Bundle;
@@ -14,7 +14,7 @@ import android.widget.BaseAdapter;
 import android.widget.GridView;
 
 import gov.anzong.androidnga.R;
-import sp.phone.adapter.BoardCatagoryAdapter;
+import io.xfdingustc.mdngaclient.ui.adapters.BoardCatagoryAdapter;
 import sp.phone.interfaces.PageCategoryOwnner;
 import sp.phone.utils.PhoneConfiguration;
 import sp.phone.utils.ThemeManager;

@@ -27,7 +27,7 @@ import java.net.URLEncoder;
 
 import gov.anzong.androidnga.R;
 import gov.anzong.androidnga.Utils;
-import io.xfdingustc.mdngaclient.activities.MainActivity;
+import io.xfdingustc.mdngaclient.ui.activities.MainActivity;
 import sp.phone.adapter.AppendableTopicAdapter;
 import sp.phone.bean.PerferenceConstant;
 import sp.phone.bean.TopicListInfo;

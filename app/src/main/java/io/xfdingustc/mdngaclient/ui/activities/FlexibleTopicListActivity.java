@@ -1,4 +1,4 @@
-package gov.anzong.androidnga.activity;
+package io.xfdingustc.mdngaclient.ui.activities;
 
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
@@ -30,6 +30,7 @@ import android.widget.HeaderViewListAdapter;
 import android.widget.ListView;
 
 import gov.anzong.androidnga.R;
+import gov.anzong.androidnga.activity.SwipeBackAppCompatActivity;
 import sp.phone.adapter.AppendableTopicAdapter;
 import sp.phone.adapter.TopicListAdapter;
 import sp.phone.bean.BoardHolder;
@@ -57,12 +58,12 @@ import uk.co.senab.actionbarpulltorefresh.extras.actionbarcompat.PullToRefreshAt
  * 帖子列表
  */
 public class FlexibleTopicListActivity extends SwipeBackAppCompatActivity
-        implements OnTopListLoadFinishedListener, OnItemClickListener,
-        OnThreadPageLoadFinishedListener, PagerOwnner,
-        OnChildFragmentRemovedListener, PullToRefreshAttacherOnwer,
-        OnItemLongClickListener,
-        ArticleContainerFragment.OnArticleContainerFragmentListener,
-        TopicListContainer.OnTopicListContainerListener {
+    implements OnTopListLoadFinishedListener, OnItemClickListener,
+    OnThreadPageLoadFinishedListener, PagerOwnner,
+    OnChildFragmentRemovedListener, PullToRefreshAttacherOnwer,
+    OnItemLongClickListener,
+    ArticleContainerFragment.OnArticleContainerFragmentListener,
+    TopicListContainer.OnTopicListContainerListener {
 
     boolean dualScreen = true;
     String strs[] = {"全部", "精华", "推荐"};
@@ -121,10 +122,10 @@ public class FlexibleTopicListActivity extends SwipeBackAppCompatActivity
         }
         this.setContentView(view);
         nightmode = ThemeManager.getInstance().getMode();
-        PullToRefreshAttacher.Options options = new PullToRefreshAttacher.Options();
-        options.refreshScrollDistance = 0.3f;
-        options.refreshOnUp = true;
-        mPullToRefreshAttacher = PullToRefreshAttacher.get(this, options);
+//        PullToRefreshAttacher.Options options = new PullToRefreshAttacher.Options();
+//        options.refreshScrollDistance = 0.3f;
+//        options.refreshOnUp = true;
+//        mPullToRefreshAttacher = PullToRefreshAttacher.get(this, options);
 
         if (ActivityUtil.isNotLessThan_4_0())
             setNfcCallBack();
@@ -163,8 +164,8 @@ public class FlexibleTopicListActivity extends SwipeBackAppCompatActivity
             }
         }
         if (authorid > 0 || searchpost > 0 || favor > 0
-                || !StringUtil.isEmpty(key) || !StringUtil.isEmpty(author)
-                || !StringUtil.isEmpty(fidgroup)) {//!StringUtil.isEmpty(table) ||
+            || !StringUtil.isEmpty(key) || !StringUtil.isEmpty(author)
+            || !StringUtil.isEmpty(fidgroup)) {//!StringUtil.isEmpty(table) ||
             fromreplyactivity = true;
         }
         if (f1 == null) {
@@ -203,7 +204,7 @@ public class FlexibleTopicListActivity extends SwipeBackAppCompatActivity
         int authorid = getIntent().getIntExtra("authorid", 0);
 
         if (favor == 0 && authorid == 0 && StringUtil.isEmpty(key)
-                && StringUtil.isEmpty(author)) {
+            && StringUtil.isEmpty(author)) {
             setNavigation();
         } else {
             flags = ThemeManager.ACTION_BAR_FLAG;
@@ -248,9 +249,9 @@ public class FlexibleTopicListActivity extends SwipeBackAppCompatActivity
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         Fragment f1 = getSupportFragmentManager().findFragmentById(
-                R.id.item_list);
+            R.id.item_list);
         Fragment f2 = getSupportFragmentManager().findFragmentById(
-                R.id.item_detail_container);
+            R.id.item_detail_container);
         f1.onPrepareOptionsMenu(menu);
         if (f2 != null && dualScreen)
             f2.onPrepareOptionsMenu(menu);
@@ -260,8 +261,8 @@ public class FlexibleTopicListActivity extends SwipeBackAppCompatActivity
     @TargetApi(11)
     private void setNavigation() {
 
-        ActionBar actionBar = getSupportActionBar();
-        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
+//        ActionBar actionBar = getSupportActionBar();
+//        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
 
         categoryAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, strs);
         OnNavigationListener callback = new OnNavigationListener() {
@@ -270,7 +271,7 @@ public class FlexibleTopicListActivity extends SwipeBackAppCompatActivity
             public boolean onNavigationItemSelected(int itemPosition,
                                                     long itemId) {
                 TopicListContainer f1 = (TopicListContainer) getSupportFragmentManager()
-                        .findFragmentById(R.id.item_list);
+                    .findFragmentById(R.id.item_list);
                 if (f1 != null) {
                     f1.onCategoryChanged(itemPosition);
                 }
@@ -278,7 +279,7 @@ public class FlexibleTopicListActivity extends SwipeBackAppCompatActivity
             }
 
         };
-        actionBar.setListNavigationCallbacks(categoryAdapter, callback);
+//        actionBar.setListNavigationCallbacks(categoryAdapter, callback);
 
     }
 
@@ -291,10 +292,10 @@ public class FlexibleTopicListActivity extends SwipeBackAppCompatActivity
             public NdefMessage createNdefMessage(NfcEvent event) {
                 FragmentManager fm = getSupportFragmentManager();
                 TopicListContainer f1 = (TopicListContainer) fm
-                        .findFragmentById(R.id.item_list);
+                    .findFragmentById(R.id.item_list);
                 final String url = f1.getNfcUrl();
                 NdefMessage msg = new NdefMessage(
-                        new NdefRecord[]{NdefRecord.createUri(url)});
+                    new NdefRecord[]{NdefRecord.createUri(url)});
                 return msg;
             }
 
@@ -386,7 +387,7 @@ public class FlexibleTopicListActivity extends SwipeBackAppCompatActivity
             int tid = StringUtil.getUrlParameter(guid, "tid");
             int authorid = StringUtil.getUrlParameter(guid, "authorid");
             ArticleContainerFragment f = ArticleContainerFragment.create(tid,
-                    pid, authorid);
+                pid, authorid);
             FragmentManager fm = getSupportFragmentManager();
             FragmentTransaction ft = fm.beginTransaction();
 
@@ -422,7 +423,7 @@ public class FlexibleTopicListActivity extends SwipeBackAppCompatActivity
 		 */
 
         Fragment articleContainer = getSupportFragmentManager()
-                .findFragmentById(R.id.item_detail_container);
+            .findFragmentById(R.id.item_detail_container);
 
         OnThreadPageLoadFinishedListener listener = null;
         try {
@@ -430,8 +431,8 @@ public class FlexibleTopicListActivity extends SwipeBackAppCompatActivity
             if (listener != null) {
                 listener.finishLoad(data);
                 getSupportActionBar().setTitle(
-                        StringUtil.unEscapeHtml(data.getThreadInfo()
-                                .getSubject()));
+                    StringUtil.unEscapeHtml(data.getThreadInfo()
+                        .getSubject()));
             }
         } catch (ClassCastException e) {
             Log.e(TAG, "detailContainer should implements OnThreadPageLoadFinishedListener");
@@ -507,7 +508,7 @@ public class FlexibleTopicListActivity extends SwipeBackAppCompatActivity
                 switch (which) {
                     case DialogInterface.BUTTON_POSITIVE:
                         DeleteBookmarkTask task = new DeleteBookmarkTask(
-                                FlexibleTopicListActivity.this, parent, positiona);
+                            FlexibleTopicListActivity.this, parent, positiona);
                         task.execute(deladd);
                         break;
 
@@ -520,8 +521,8 @@ public class FlexibleTopicListActivity extends SwipeBackAppCompatActivity
 
         final AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage(this.getString(R.string.delete_favo_confirm_text))
-                .setPositiveButton(R.string.confirm, dialogClickListener)
-                .setNegativeButton(R.string.cancle, dialogClickListener);
+            .setPositiveButton(R.string.confirm, dialogClickListener)
+            .setNegativeButton(R.string.cancle, dialogClickListener);
         final AlertDialog dialog = builder.create();
         dialog.show();
         dialog.setOnDismissListener(new AlertDialog.OnDismissListener() {
