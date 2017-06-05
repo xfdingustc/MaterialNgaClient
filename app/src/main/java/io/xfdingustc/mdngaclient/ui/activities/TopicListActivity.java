@@ -66,8 +66,7 @@ import uk.co.senab.actionbarpulltorefresh.extras.actionbarcompat.PullToRefreshAt
  * 帖子列表
  */
 public class TopicListActivity extends SwipeBackAppCompatActivity implements OnTopListLoadFinishedListener, OnItemClickListener,
-    OnThreadPageLoadFinishedListener, PagerOwnner, OnChildFragmentRemovedListener, PullToRefreshAttacherOnwer, OnItemLongClickListener,
-    ArticleContainerFragment.OnArticleContainerFragmentListener, TopicListContainer.OnTopicListContainerListener, NextJsonTopicListLoader {
+    OnThreadPageLoadFinishedListener, PagerOwnner, PullToRefreshAttacherOnwer, OnItemLongClickListener, NextJsonTopicListLoader {
     private String TAG = TopicListActivity.class.getSimpleName();
     int fid;
     private AppendableTopicAdapter adapter;
@@ -178,52 +177,6 @@ public class TopicListActivity extends SwipeBackAppCompatActivity implements OnT
                 strs[0] = boardName;
             }
         }
-        int favor = getIntent().getIntExtra("favor", 0);
-        String key = getIntent().getStringExtra("key");
-        String fidgroup = getIntent().getStringExtra("fidgroup");
-        int authorid = getIntent().getIntExtra("authorid", 0);
-
-        if (favor == 0 && authorid == 0 && StringUtil.isEmpty(key)
-            && StringUtil.isEmpty(author)) {
-            setNavigation();
-        } else {
-            flags = ThemeManager.ACTION_BAR_FLAG;
-        }
-        if (favor != 0) {
-            getSupportActionBar().setTitle(R.string.bookmark_title);
-        }
-        if (!StringUtil.isEmpty(key)) {
-            flags = ThemeManager.ACTION_BAR_FLAG;
-            if (content == 1) {
-                if (!StringUtil.isEmpty(fidgroup)) {
-                    final String title = "搜索全站(包含正文):" + key;
-                    getSupportActionBar().setTitle(title);
-                } else {
-                    final String title = "搜索(包含正文):" + key;
-                    getSupportActionBar().setTitle(title);
-                }
-            } else {
-                if (!StringUtil.isEmpty(fidgroup)) {
-                    final String title = "搜索全站:" + key;
-                    getSupportActionBar().setTitle(title);
-                } else {
-                    final String title = "搜索:" + key;
-                    getSupportActionBar().setTitle(title);
-                }
-            }
-        } else {
-            if (!StringUtil.isEmpty(author)) {
-                flags = ThemeManager.ACTION_BAR_FLAG;
-                if (searchpost > 0) {
-                    final String title = "搜索" + author + "的回复";
-                    getSupportActionBar().setTitle(title);
-                } else {
-                    final String title = "搜索" + author + "的主题";
-                    getSupportActionBar().setTitle(title);
-                }
-            }
-        }
-
     }
 
     private void initViews() {
@@ -301,32 +254,6 @@ public class TopicListActivity extends SwipeBackAppCompatActivity implements OnT
     }
 
 
-    @TargetApi(11)
-    private void setNavigation() {
-
-//        ActionBar actionBar = getSupportActionBar();
-//        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
-
-        categoryAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, strs);
-        OnNavigationListener callback = new OnNavigationListener() {
-
-            @Override
-            public boolean onNavigationItemSelected(int itemPosition,
-                                                    long itemId) {
-                TopicListContainer f1 = (TopicListContainer) getSupportFragmentManager()
-                    .findFragmentById(R.id.item_list);
-                if (f1 != null) {
-                    f1.onCategoryChanged(itemPosition);
-                }
-                return true;
-            }
-
-        };
-//        actionBar.setListNavigationCallbacks(categoryAdapter, callback);
-
-    }
-
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
@@ -361,9 +288,7 @@ public class TopicListActivity extends SwipeBackAppCompatActivity implements OnT
 
         mTopicListInfo = result;
         if (result.get__SEARCHNORESULT()) {
-
-            Toast.makeText(this, "结果已搜索完毕",
-                Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "结果已搜索完毕", Toast.LENGTH_SHORT).show();
             return;
         }
         int lines = 35;
@@ -450,16 +375,6 @@ public class TopicListActivity extends SwipeBackAppCompatActivity implements OnT
         }
     }
 
-    @Override
-    public void OnChildFragmentRemoved(int id) {
-        if (id == R.id.item_detail_container) {
-            FragmentManager fm = getSupportFragmentManager();
-            Fragment f1 = fm.findFragmentById(R.id.item_list);
-            f1.setHasOptionsMenu(true);
-            getSupportActionBar().setTitle("主题列表");
-            guidtmp = "";
-        }
-    }
 
     @Override
     public PullToRefreshAttacher getAttacher() {
@@ -522,36 +437,10 @@ public class TopicListActivity extends SwipeBackAppCompatActivity implements OnT
         return true;
     }
 
-    @Override
-    public void onModeChanged() {
-        Fragment f1 = getSupportFragmentManager().findFragmentById(R.id.item_list);
-        if (f1 != null) {
-            ((TopicListContainer) f1).changedMode();
-        }
-    }
-
-    @Override
-    public void onAnotherModeChanged() {
-        Fragment f2 = getSupportFragmentManager().findFragmentById(R.id.item_detail_container);
-        if (f2 != null) {
-            ((ArticleContainerFragment) f2).changemode();
-        } else {
-            FrameLayout v = (FrameLayout) findViewById(R.id.item_detail_container);
-            if (v != null) {
-                if (ThemeManager.getInstance().getMode() == ThemeManager.MODE_NIGHT) {
-                    v.setBackgroundResource(R.color.night_bg_color);
-                } else {
-                    v.setBackgroundResource(R.color.shit1);
-                }
-            }
-        }
-    }
 
     @Override
     public void loadNextPage(OnTopListLoadFinishedListener callback) {
         JsonTopicListLoadTask task = new JsonTopicListLoadTask(this, callback);
-//        refresh_saying();
-
         task.execute(getUrl(adapter.getNextPage(), adapter.getIsEnd(), false));
     }
 }
