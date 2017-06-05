@@ -25,6 +25,7 @@ import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
+import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 /**
  * Created by whaley on 2017/5/16.
@@ -67,6 +68,7 @@ public class ApplicationModule {
         return new Retrofit.Builder()
             .client(okHttpClient)
             .baseUrl(url)
+            .addConverterFactory(ScalarsConverterFactory.create())
             .addConverterFactory(GsonConverterFactory.create())
             .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
             .build();
@@ -91,6 +93,7 @@ public class ApplicationModule {
         }
 
         return builder
+            .followRedirects(false)
             .cookieJar(cookieJar)
             .build();
     }

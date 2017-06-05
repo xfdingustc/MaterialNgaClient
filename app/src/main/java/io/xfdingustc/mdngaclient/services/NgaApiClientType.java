@@ -1,5 +1,8 @@
 package io.xfdingustc.mdngaclient.services;
 
+import android.support.annotation.NonNull;
+
+import io.xfdingustc.mdngaclient.services.apiresponses.AccessTokenEnvelope;
 import io.xfdingustc.mdngaclient.services.apiresponses.VCodeEnvelope;
 import okhttp3.ResponseBody;
 import retrofit2.Response;
@@ -12,4 +15,6 @@ import rx.Observable;
 
 public interface NgaApiClientType {
     Observable<VCodeEnvelope> fetchVerificationCode();
+
+    Observable<AccessTokenEnvelope> login(@NonNull String authCodeCookie, @NonNull String username, @NonNull String password, @NonNull String vcode);
 }

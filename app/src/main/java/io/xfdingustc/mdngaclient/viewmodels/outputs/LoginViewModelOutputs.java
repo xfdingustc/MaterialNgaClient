@@ -9,6 +9,8 @@ import rx.Observable;
  */
 
 public interface LoginViewModelOutputs {
+    Observable<Void> loginSuccess();
+
     Observable<Boolean> setLoginButtonIsEnabled();
 
     Observable<Bitmap> setVerificationCode();

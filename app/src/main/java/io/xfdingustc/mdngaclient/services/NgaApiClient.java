@@ -6,14 +6,19 @@ import android.support.annotation.NonNull;
 
 import com.orhanobut.logger.Logger;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.List;
 
 import io.xfdingustc.mdngaclient.libs.rx.operators.ApiErrorOperator;
+import io.xfdingustc.mdngaclient.libs.rx.operators.LoginErrorOperator;
 import io.xfdingustc.mdngaclient.libs.rx.operators.Operators;
+import io.xfdingustc.mdngaclient.services.apiresponses.AccessTokenEnvelope;
 import io.xfdingustc.mdngaclient.services.apiresponses.VCodeEnvelope;
 import okhttp3.ResponseBody;
 import retrofit2.Response;
 import rx.Observable;
+import rx.Subscriber;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
@@ -54,6 +59,23 @@ public class NgaApiClient implements NgaApiClientType {
 
 
             .subscribeOn(Schedulers.io());
+    }
+
+    @Override
+    public Observable<AccessTokenEnvelope> login(@NonNull String authCodeCookie, @NonNull String username, @NonNull String password, @NonNull String vcode) {
+        try {
+            StringBuilder bodyBuilder = new StringBuilder("email=")
+                .append(URLEncoder.encode(username, "utf-8"))
+                .append("&password=").append(URLEncoder.encode(password, "utf-8"))
+                .append("&vcode=").append(URLEncoder.encode(vcode, "utf-8"));
+            String header = "reg_vcode=" + authCodeCookie;
+            return service.login(header, bodyBuilder.toString())
+                .lift(Operators.loginErrorOperator())
+                .subscribeOn(Schedulers.io());
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+            return Observable.error(e);
+        }
     }
 
 

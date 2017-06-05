@@ -15,6 +15,7 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.halcyon.logger.HttpLogInterceptor;
 import com.orhanobut.logger.Logger;
@@ -126,41 +127,13 @@ public class LoginActivity extends BaseActivity<LoginViewModel> implements Perfe
 
     @OnClick(R.id.login_button)
     public void onBtnLoginClicked() {
-        StringBuffer bodyBuffer = new StringBuffer();
-        bodyBuffer.append("email=");
-        if (StringUtil.isEmpty(authcodeCookie)) {
-            showToast("验证码信息错误，请重试");
-            reloadAuthCode();
-            return;
-        }
-        name = userText.getText().toString();
-        if (StringUtil.isEmpty(name) ||
-            StringUtil.isEmpty(passwordText.getText().toString()) ||
-            StringUtil.isEmpty(authcodeText.getText().toString())) {
-            showToast("内容缺少，请检查后再试");
-            reloadAuthCode();
-            return;
-        }
-        try {
-            bodyBuffer.append(URLEncoder.encode(userText.getText().toString(), "utf-8"));
-            bodyBuffer.append("&password=");
-            bodyBuffer.append(URLEncoder.encode(passwordText.getText().toString(), "utf-8"));
-            bodyBuffer.append("&vcode=");
-            bodyBuffer.append(URLEncoder.encode(authcodeText.getText().toString(), "utf-8"));
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        doLogin(bodyBuffer.toString());
-
+        viewModel.inputs.loginClick();
     }
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        // requestWindowFeature(Window.FEATURE_NO_TITLE);
-        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
         super.onCreate(savedInstanceState);
-
 
         initViews();
 
@@ -170,7 +143,6 @@ public class LoginActivity extends BaseActivity<LoginViewModel> implements Perfe
             .subscribe(new Action1<Boolean>() {
                 @Override
                 public void call(Boolean enabled) {
-                    Logger.t(TAG).d("set login button: " + enabled);
                     loginButton.setEnabled(enabled);
                 }
             });
@@ -184,6 +156,18 @@ public class LoginActivity extends BaseActivity<LoginViewModel> implements Perfe
                     authcodeImg.setImageBitmap(bitmap);
                 }
             });
+
+        viewModel.outputs.loginSuccess()
+            .compose(this.<Void>bindToLifecycle())
+            .compose(Transformers.<Void>observerForUI())
+            .subscribe(new Action1<Void>() {
+                @Override
+                public void call(Void aVoid) {
+                    finish();
+                }
+            });
+
+//        viewModel.errors.
 
         userList.setAdapter(new UserListAdapter(this, userText));
 
@@ -260,110 +244,9 @@ public class LoginActivity extends BaseActivity<LoginViewModel> implements Perfe
     }
 
 
-    private void doLogin(String postBody) {
-        OkHttpClient.Builder clientBuilder = new OkHttpClient.Builder()
-            .addInterceptor(new Interceptor() {
-                @Override
-                public okhttp3.Response intercept(Chain chain) throws IOException {
-                    Request request = chain.request();
-                    Request.Builder requestBuilder = request.newBuilder();
-                    requestBuilder.addHeader("Cookie", "reg_vcode=" + authcodeCookie);
-                    final okhttp3.Response response = chain.proceed(requestBuilder.build());
-
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            if (!validateLoginInfo(response)) {
-                                reloadAuthCode();
-                            }
-                        }
-                    });
 
 
-                    return response;
-                }
-            })
-            .addInterceptor(new HttpLogInterceptor())
-            .followRedirects(false)
-            .readTimeout(15000, TimeUnit.MILLISECONDS)
-            .connectTimeout(15000, TimeUnit.MILLISECONDS);
 
-        new Retrofit.Builder()
-            .addConverterFactory(ScalarsConverterFactory.create())
-            .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
-            .baseUrl(Consts.BASE_URL)
-            .client(clientBuilder.build())
-            .build()
-            .create(NgaApiService.class)
-            .login(postBody)
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(new SimpleSubscriber<ResponseBody>() {
-                @Override
-                public void onNext(ResponseBody response) {
-//                        Logger.t(TAG).d("Response body: " + response.toString());
-
-                }
-            });
-    }
-
-    private boolean validateLoginInfo(okhttp3.Response response) {
-        String key, value;
-        Headers headers = response.headers();
-        String cid = "", uid = "";
-        for (int i = 0; i < headers.size(); i++) {
-            key = headers.name(i);
-            value = headers.value(i);
-            Logger.t(TAG).d(key + " : " + value);
-            if (key.equalsIgnoreCase("location")) {
-                String re301location = value;
-                if (re301location.indexOf("login_failed") > 0) {
-                    if (re301location.indexOf("error_vcode") > 0) {
-                        authcodeText.setError(getString(R.string.vcode_error));
-                    } else if (re301location.indexOf("e_login") > 0) {
-                        passwordText.setError(getString(R.string.user_name_pwd_error));
-                    } else {
-                        showToast(R.string.unknown_error);
-                    }
-                    return false;
-                }
-            }
-            if (key.equalsIgnoreCase("set-cookie")) {
-                String cookieVal = value;
-                cookieVal = cookieVal.substring(0, cookieVal.indexOf(';'));
-                if (cookieVal.indexOf("_sid=") == 0) {
-                    cid = cookieVal.substring(5);
-                }
-                if (cookieVal.indexOf("_178c=") == 0) {
-                    uid = cookieVal.substring(6, cookieVal.indexOf('%'));
-                    if (StringUtil.isEmail(name)) {
-                        try {
-                            String nametmp = cookieVal.substring(cookieVal.indexOf("%23") + 3);
-                            nametmp = URLDecoder.decode(nametmp, "utf-8");
-                            String[] stemp = nametmp.split("#");
-                            for (int ia = 0; ia < stemp.length; ia++) {
-                                if (!StringUtil.isEmail(stemp[ia])) {
-                                    name = stemp[ia];
-                                    ia = stemp.length;
-                                }
-                            }
-                        } catch (UnsupportedEncodingException e) {
-                        }
-                    }
-                }
-
-                if (!TextUtils.isEmpty(uid) && !TextUtils.isEmpty(cid)) {
-                    saveCookie(uid, cid);
-                    return true;
-                }
-
-            }
-
-        }
-
-        return false;
-
-    }
 
     private void saveCookie(String uid, String cid) {
         showToast(R.string.login_successfully);
