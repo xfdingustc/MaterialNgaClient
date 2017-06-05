@@ -12,4 +12,6 @@ public interface LoginViewModelInputs {
     void vcode(String __);
 
     void loginClick();
+
+    void reloadVCodeClick();
 }

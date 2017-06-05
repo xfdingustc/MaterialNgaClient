@@ -45,6 +45,7 @@ public class LoginViewModel extends ActivityViewModel<LoginActivity> implements 
     private final PublishSubject<String> password = PublishSubject.create();
     private final PublishSubject<String> vcode = PublishSubject.create();
     private final PublishSubject<View> loginClick = PublishSubject.create();
+    private final PublishSubject<View> reloadVCodeClick = PublishSubject.create();
 
     private final BehaviorSubject<Bitmap> setVerificationCode = BehaviorSubject.create();
 
@@ -68,7 +69,6 @@ public class LoginViewModel extends ActivityViewModel<LoginActivity> implements 
             .map(new Func1<AuthInfoEnvelope, Boolean>() {
                 @Override
                 public Boolean call(AuthInfoEnvelope authInfoEnvelope) {
-//                    Logger.t(TAG).d(authInfoEnvelope.toString());
                     return authInfoEnvelope.isValid();
                 }
             });
@@ -93,7 +93,30 @@ public class LoginViewModel extends ActivityViewModel<LoginActivity> implements 
                 }
             });
 
-        client.fetchVerificationCode()
+        Observable<View> initialVCode = Observable.just(null);
+
+        Observable.merge(initialVCode, reloadVCodeClick)
+            .switchMap(new Func1<View, Observable<Bitmap>>() {
+                @Override
+                public Observable<Bitmap> call(View view) {
+                    return reloadVCode();
+                }
+            })
+            .compose(this.<Bitmap>bindToLifecycle())
+            .subscribe(setVerificationCode);
+
+
+    }
+
+
+    private Observable<AccessTokenEnvelope> submit(AuthInfoEnvelope env) {
+        return client.login(authcodeCookie, env.username, env.password, env.vcode)
+            .compose(Transformers.<AccessTokenEnvelope>pipeApiErrorsTo(loginError))
+            .compose(Transformers.<AccessTokenEnvelope>neverError());
+    }
+
+    private Observable<Bitmap> reloadVCode() {
+        return client.fetchVerificationCode()
             .compose(this.<VCodeEnvelope>bindToLifecycle())
             .map(new Func1<VCodeEnvelope, Bitmap>() {
                 @Override
@@ -101,17 +124,8 @@ public class LoginViewModel extends ActivityViewModel<LoginActivity> implements 
                     authcodeCookie = vCodeEnvelope.vCode;
                     return vCodeEnvelope.vCodeImage;
                 }
-            })
-            .subscribe(setVerificationCode);
-    }
+            });
 
-
-
-
-    private Observable<AccessTokenEnvelope> submit(AuthInfoEnvelope env) {
-        return client.login(authcodeCookie, env.username, env.password, env.vcode)
-            .compose(Transformers.<AccessTokenEnvelope>pipeApiErrorsTo(loginError))
-            .compose(Transformers.<AccessTokenEnvelope>neverError());
     }
 
     @Override
@@ -149,10 +163,20 @@ public class LoginViewModel extends ActivityViewModel<LoginActivity> implements 
         loginClick.onNext(null);
     }
 
+    @Override
+    public void reloadVCodeClick() {
+        reloadVCodeClick.onNext(null);
+
+    }
+
     public void success(AccessTokenEnvelope accessTokenEnvelope) {
         loginSuccess.onNext(null);
     }
 
+    @Override
+    public Observable<ErrorEnvelope> invalidLoginError() {
+        return loginError;
+    }
 
 
     class AuthInfoEnvelope {

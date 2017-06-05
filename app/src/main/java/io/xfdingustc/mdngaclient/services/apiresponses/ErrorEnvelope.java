@@ -22,4 +22,8 @@ public class ErrorEnvelope {
 
         return null;
     }
+
+    public int errorCode() {
+        return errorCode;
+    }
 }

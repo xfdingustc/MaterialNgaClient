@@ -26,6 +26,7 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.concurrent.TimeUnit;
 
+import butterknife.BindString;
 import butterknife.BindView;
 import butterknife.OnClick;
 import butterknife.OnTextChanged;
@@ -34,9 +35,11 @@ import io.xfdingustc.mdngaclient.app.MdNgaApplication;
 import io.xfdingustc.mdngaclient.libs.BaseActivity;
 import io.xfdingustc.mdngaclient.libs.qualifiers.RequiresActivityViewModel;
 import io.xfdingustc.mdngaclient.libs.rx.transformers.Transformers;
+import io.xfdingustc.mdngaclient.services.LoginException;
 import io.xfdingustc.mdngaclient.services.NgaApiService;
 import io.xfdingustc.mdngaclient.libs.rx.SimpleSubscriber;
 import gov.anzong.androidnga.R;
+import io.xfdingustc.mdngaclient.services.apiresponses.ErrorEnvelope;
 import io.xfdingustc.mdngaclient.viewmodels.LoginViewModel;
 import okhttp3.Headers;
 import okhttp3.Interceptor;
@@ -101,9 +104,14 @@ public class LoginActivity extends BaseActivity<LoginViewModel> implements Perfe
     @BindView(R.id.login_authcode_layout)
     TextInputLayout authCodeLayout;
 
-
     @BindView(R.id.user_list)
     ListView userList;
+
+    @BindString(R.string.user_name_pwd_error)
+    String pwdError;
+
+    @BindString(R.string.vcode_error)
+    String vcodeError;
 
     @OnTextChanged(R.id.login_user_edittext)
     void onUsernameTextChanged(CharSequence username) {
@@ -122,7 +130,7 @@ public class LoginActivity extends BaseActivity<LoginViewModel> implements Perfe
 
     @OnClick({R.id.authcode_refresh, R.id.authcode_img})
     public void onAuthCodeRefreshClicked() {
-        reloadAuthCode();
+        viewModel.inputs.reloadVCodeClick();
     }
 
     @OnClick(R.id.login_button)
@@ -167,7 +175,16 @@ public class LoginActivity extends BaseActivity<LoginViewModel> implements Perfe
                 }
             });
 
-//        viewModel.errors.
+        viewModel.errors.invalidLoginError()
+            .compose(this.<ErrorEnvelope>bindToLifecycle())
+            .compose(Transformers.<ErrorEnvelope>observerForUI())
+            .subscribe(new Action1<ErrorEnvelope>() {
+                @Override
+                public void call(ErrorEnvelope errorEnvelope) {
+                    loginError(errorEnvelope);
+
+                }
+            });
 
         userList.setAdapter(new UserListAdapter(this, userText));
 
@@ -208,6 +225,17 @@ public class LoginActivity extends BaseActivity<LoginViewModel> implements Perfe
         }
 
         reloadAuthCode();
+    }
+
+    private void loginError(ErrorEnvelope errorEnvelope) {
+        switch (errorEnvelope.errorCode()) {
+            case LoginException.ERROR_PASSWORD:
+                passwordText.setError(pwdError);
+                break;
+            case LoginException.ERROR_VCODE:
+                authcodeText.setError(vcodeError);
+                break;
+        }
     }
 
     private void initViews() {
