@@ -402,57 +402,7 @@ public class MainActivity extends BaseActivity<MainViewModel> implements Perfere
 
     }
 
-    @SuppressWarnings("ResourceType")
-    public void handleUserAvatat(ImageView avatarIV, String userId) {// 绝无问题
-        Bitmap defaultAvatar = null, bitmap = null;
-        if (PhoneConfiguration.getInstance().nikeWidth < 3) {
-            return;
-        }
-        if (defaultAvatar == null
-                || defaultAvatar.getWidth() != PhoneConfiguration.getInstance().nikeWidth) {
-            Resources res = getLayoutInflater().getContext().getResources();
-            InputStream is = res.openRawResource(R.drawable.default_avatar);
-            InputStream is2 = res.openRawResource(R.drawable.default_avatar);
-            defaultAvatar = ImageUtil.loadAvatarFromStream(is, is2);
-        }
-        Object tagObj = avatarIV.getTag();
-        if (tagObj instanceof AvatarTag) {
-            AvatarTag origTag = (AvatarTag) tagObj;
-            if (origTag.isDefault == false) {
-                ImageUtil.recycleImageView(avatarIV);
-            }
-        }
-        AvatarTag tag = new AvatarTag(Integer.parseInt(userId), true);
-        avatarIV.setImageBitmap(defaultAvatar);
-        avatarIV.setTag(tag);
-        String avatarPath = HttpUtil.PATH_AVATAR + "/" + userId;
-        String[] extension = {".jpg", ".png", ".gif", ".jpeg", ".bmp"};
-        for (int i = 0; i < 5; i++) {
-            File f = new File(avatarPath + extension[i]);
-            if (f.exists()) {
 
-                bitmap = ImageUtil.loadAvatarFromSdcard(avatarPath
-                        + extension[i]);
-                if (bitmap == null) {
-                    f.delete();
-                }
-                long date = f.lastModified();
-                if ((System.currentTimeMillis() - date) / 1000 > 30 * 24 * 3600) {
-                    f.delete();
-                }
-                break;
-            }
-        }
-        if (bitmap != null) {
-            avatarIV.setImageBitmap(toRoundCorner(bitmap, 2));
-            tag.isDefault = false;
-        } else {
-            avatarIV.setImageDrawable(getResources().getDrawable(
-                    R.drawable.drawerdefaulticon));
-            tag.isDefault = true;
-        }
-
-    }
 
     void loadConfig(Intent intent) {
         // initUserInfo(intent);
@@ -971,14 +921,6 @@ public class MainActivity extends BaseActivity<MainViewModel> implements Perfere
 
     }
 
-
-
-
-
-
-
-
-
     class EnterToplistLintener implements OnItemClickListener, OnClickListener {
         int position;
         String fidString;
@@ -1017,22 +959,11 @@ public class MainActivity extends BaseActivity<MainViewModel> implements Perfere
             PhoneConfiguration config = PhoneConfiguration.getInstance();
             if (!StringUtil.isEmpty(config.getCookie())) {
                 url = url + "&" + config.getCookie().replace("; ", "&");
-            } else if (fid < 0) {
-                LoginActivity.launch(MainActivity.this);
-                return;
             }
             addToRecent();
             if (!StringUtil.isEmpty(url)) {
-                Intent intent = new Intent();
-                intent.putExtra("tab", "1");
-                intent.putExtra("fid", fid);
-                intent.setClass(MainActivity.this, config.topicActivityClass);
-                // intent.setClass(MainActivity.this, TopicListActivity.class);
-                startActivity(intent);
-                if (PhoneConfiguration.getInstance().showAnimation) {
-                    overridePendingTransition(R.anim.zoom_enter,
-                            R.anim.zoom_exit);
-                }
+                TopicListActivity.launch(MainActivity.this, fid);
+
             }
         }
 

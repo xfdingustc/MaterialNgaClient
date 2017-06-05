@@ -1,18 +1,16 @@
 package io.xfdingustc.mdngaclient.ui.activities;
 
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.nfc.NdefMessage;
 import android.nfc.NdefRecord;
 import android.nfc.NfcAdapter;
 import android.nfc.NfcAdapter.CreateNdefMessageCallback;
 import android.nfc.NfcEvent;
-import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -67,13 +65,12 @@ import uk.co.senab.actionbarpulltorefresh.extras.actionbarcompat.PullToRefreshAt
 /**
  * 帖子列表
  */
-public class FlexibleTopicListActivity extends SwipeBackAppCompatActivity implements OnTopListLoadFinishedListener, OnItemClickListener,
+public class TopicListActivity extends SwipeBackAppCompatActivity implements OnTopListLoadFinishedListener, OnItemClickListener,
     OnThreadPageLoadFinishedListener, PagerOwnner, OnChildFragmentRemovedListener, PullToRefreshAttacherOnwer, OnItemLongClickListener,
     ArticleContainerFragment.OnArticleContainerFragmentListener, TopicListContainer.OnTopicListContainerListener, NextJsonTopicListLoader {
-    private String TAG = FlexibleTopicListActivity.class.getSimpleName();
+    private String TAG = TopicListActivity.class.getSimpleName();
     int fid;
     private AppendableTopicAdapter adapter;
-    boolean dualScreen = true;
     String strs[] = {"全部", "精华", "推荐"};
     ArrayAdapter<String> categoryAdapter;
     int flags = 7;
@@ -90,7 +87,7 @@ public class FlexibleTopicListActivity extends SwipeBackAppCompatActivity implem
     //	String table;
     String fidgroup;
     String author;
-    boolean fromreplyactivity = false;
+//    boolean fromreplyactivity = false;
 
     private CheckReplyNotificationTask asynTask;
     private PullToRefreshAttacher mPullToRefreshAttacher;
@@ -106,6 +103,13 @@ public class FlexibleTopicListActivity extends SwipeBackAppCompatActivity implem
     @OnClick(R.id.fab)
     public void onFabClicked() {
         refresh();
+    }
+
+    public static void launch(Activity activity, int fid) {
+        Intent intent = new Intent(activity, TopicListActivity.class);
+        intent.putExtra("tab", "1");
+        intent.putExtra("fid", fid);
+        activity.startActivity(intent);
     }
 
     private int getUrlParameter(String url, String paraName) {
@@ -132,8 +136,8 @@ public class FlexibleTopicListActivity extends SwipeBackAppCompatActivity implem
     }
 
     @Override
-    protected void onCreate(Bundle arg0) {
-        super.onCreate(arg0);
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_topiclist);
 
         String url = getIntent().getDataString();
@@ -163,14 +167,9 @@ public class FlexibleTopicListActivity extends SwipeBackAppCompatActivity implem
                 fidgroup = getIntent().getExtras().getString("fidgroup");
             }
         }
-        if (authorid > 0 || searchpost > 0 || favor > 0
-            || !StringUtil.isEmpty(key) || !StringUtil.isEmpty(author)
-            || !StringUtil.isEmpty(fidgroup)) {//!StringUtil.isEmpty(table) ||
-            fromreplyactivity = true;
-        }
 
 
-        onFragmentCreated();
+        initViews();
 
         int fid = getIntent().getIntExtra("fid", 0);
         if (fid != 0) {
@@ -227,7 +226,7 @@ public class FlexibleTopicListActivity extends SwipeBackAppCompatActivity implem
 
     }
 
-    private void onFragmentCreated() {
+    private void initViews() {
         adapter = new AppendableTopicAdapter(this, null, this);
         listView.setAdapter(adapter);
         try {
@@ -301,17 +300,6 @@ public class FlexibleTopicListActivity extends SwipeBackAppCompatActivity implem
         return jsonUri;
     }
 
-    @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-        Fragment f1 = getSupportFragmentManager().findFragmentById(
-            R.id.item_list);
-        Fragment f2 = getSupportFragmentManager().findFragmentById(
-            R.id.item_detail_container);
-        f1.onPrepareOptionsMenu(menu);
-        if (f2 != null && dualScreen)
-            f2.onPrepareOptionsMenu(menu);
-        return super.onPrepareOptionsMenu(menu);
-    }
 
     @TargetApi(11)
     private void setNavigation() {
@@ -338,34 +326,6 @@ public class FlexibleTopicListActivity extends SwipeBackAppCompatActivity implem
 
     }
 
-    @TargetApi(14)
-    void setNfcCallBack() {
-        NfcAdapter adapter = NfcAdapter.getDefaultAdapter(this);
-        CreateNdefMessageCallback callback = new CreateNdefMessageCallback() {
-
-            @Override
-            public NdefMessage createNdefMessage(NfcEvent event) {
-                FragmentManager fm = getSupportFragmentManager();
-                TopicListContainer f1 = (TopicListContainer) fm
-                    .findFragmentById(R.id.item_list);
-                final String url = f1.getNfcUrl();
-                NdefMessage msg = new NdefMessage(
-                    new NdefRecord[]{NdefRecord.createUri(url)});
-                return msg;
-            }
-
-        };
-        if (adapter != null) {
-            adapter.setNdefPushMessageCallback(callback, this);
-        }
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-
-        ReflectionUtil.actionBar_setDisplayOption(this, flags);
-        return false;// super.onCreateOptionsMenu(menu);
-    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -429,46 +389,10 @@ public class FlexibleTopicListActivity extends SwipeBackAppCompatActivity implem
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        if (!dualScreen) {// 非平板
-            if (null == onItemClickNewActivity) {
-                onItemClickNewActivity = new EnterJsonArticle(this, fromreplyactivity);
-            }
-            onItemClickNewActivity.onItemClick(parent, view, position, id);
-        } else {
-            String guid = (String) parent.getItemAtPosition(position);
-            if (StringUtil.isEmpty(guid))
-                return;
-
-            guid = guid.trim();
-            guidtmp = guid;
-
-            int pid = StringUtil.getUrlParameter(guid, "pid");
-            int tid = StringUtil.getUrlParameter(guid, "tid");
-            int authorid = StringUtil.getUrlParameter(guid, "authorid");
-            ArticleContainerFragment f = ArticleContainerFragment.create(tid,
-                pid, authorid);
-            FragmentManager fm = getSupportFragmentManager();
-            FragmentTransaction ft = fm.beginTransaction();
-
-            ft.replace(R.id.item_detail_container, f);
-            Fragment f1 = fm.findFragmentById(R.id.item_list);
-            f1.setHasOptionsMenu(false);
-            f.setHasOptionsMenu(true);
-            ft.commit();
-
-            ListView listview = (ListView) parent;
-            Object a = parent.getAdapter();
-            TopicListAdapter adapter = null;
-            if (a instanceof TopicListAdapter) {
-                adapter = (TopicListAdapter) a;
-            } else if (a instanceof HeaderViewListAdapter) {
-                HeaderViewListAdapter ha = (HeaderViewListAdapter) a;
-                adapter = (TopicListAdapter) ha.getWrappedAdapter();
-                position -= ha.getHeadersCount();
-            }
-            adapter.setSelected(position);
-            listview.setItemChecked(position, true);
+        if (null == onItemClickNewActivity) {
+            onItemClickNewActivity = new EnterJsonArticle(this, false);
         }
+        onItemClickNewActivity.onItemClick(parent, view, position, id);
     }
 
     @Override
@@ -567,7 +491,7 @@ public class FlexibleTopicListActivity extends SwipeBackAppCompatActivity implem
                 switch (which) {
                     case DialogInterface.BUTTON_POSITIVE:
                         DeleteBookmarkTask task = new DeleteBookmarkTask(
-                            FlexibleTopicListActivity.this, parent, positiona);
+                            TopicListActivity.this, parent, positiona);
                         task.execute(deladd);
                         break;
 

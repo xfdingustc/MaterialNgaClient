@@ -12,7 +12,7 @@ import gov.anzong.androidnga.activity.FlexibleMessageListActivity;
 import gov.anzong.androidnga.activity.FlexibleNonameTopicListActivity;
 import gov.anzong.androidnga.activity.FlexibleProfileActivity;
 import gov.anzong.androidnga.activity.FlexibleSignActivity;
-import io.xfdingustc.mdngaclient.ui.activities.FlexibleTopicListActivity;
+import io.xfdingustc.mdngaclient.ui.activities.TopicListActivity;
 import gov.anzong.androidnga.activity.HaArticleListActivity;
 import gov.anzong.androidnga.activity.HaFlexibleMessageListActivity;
 import gov.anzong.androidnga.activity.HaFlexibleNonameTopicListActivity;
@@ -98,7 +98,7 @@ public class PhoneConfiguration implements PerferenceConstant {
     public int replytotalnum = 0;
     public Set<Integer> blacklist = new HashSet<Integer>();
     public String db_cookie;
-    public Class<?> topicActivityClass = FlexibleTopicListActivity.class;
+    public Class<?> topicActivityClass = TopicListActivity.class;
     public Class<?> articleActivityClass = ArticleListActivity.class;
     public Class<?> nonameArticleActivityClass = NonameArticleListActivity.class;
     public Class<?> postActivityClass = PostActivity.class;
@@ -336,7 +336,7 @@ public class PhoneConfiguration implements PerferenceConstant {
                 MeiziTopicActivityClass = MeiziTopicActivity.class;
                 break;
             case UI_FLAG_REPLYSPLIT:/*仅开启发在下面，则菜单和硬件加速都用普通的，发用Split版本的*/
-                topicActivityClass = FlexibleTopicListActivity.class;
+                topicActivityClass = TopicListActivity.class;
                 messageActivityClass = FlexibleMessageListActivity.class;
                 nonameActivityClass = FlexibleNonameTopicListActivity.class;
                 articleActivityClass = ArticleListActivity.class;
@@ -422,7 +422,7 @@ public class PhoneConfiguration implements PerferenceConstant {
                 break;
             case 0:
             default:
-                topicActivityClass = FlexibleTopicListActivity.class;
+                topicActivityClass = TopicListActivity.class;
                 articleActivityClass = ArticleListActivity.class;
                 nonameArticleActivityClass = NonameArticleListActivity.class;
                 messageDetialActivity = MessageDetialActivity.class;

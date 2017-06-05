@@ -16,7 +16,7 @@ import android.widget.ArrayAdapter;
 
 import io.xfdingustc.mdngaclient.app.MdNgaApplication;
 import gov.anzong.androidnga.R;
-import io.xfdingustc.mdngaclient.ui.activities.FlexibleTopicListActivity;
+import io.xfdingustc.mdngaclient.ui.activities.TopicListActivity;
 import sp.phone.adapter.ActionBarUserListAdapter;
 import sp.phone.adapter.SpinnerUserListAdapter;
 import sp.phone.bean.SignData;
@@ -39,7 +39,7 @@ public class FlexibleSignActivity extends SwipeBackAppCompatActivity implements
     boolean dualScreen = true;
     int flags = 7;
     ArrayAdapter<String> categoryAdapter;
-    private String TAG = FlexibleTopicListActivity.class.getSimpleName();
+    private String TAG = TopicListActivity.class.getSimpleName();
     private PullToRefreshAttacher mPullToRefreshAttacher;
 
     @Override

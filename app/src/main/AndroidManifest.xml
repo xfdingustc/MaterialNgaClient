@@ -92,7 +92,7 @@
         android:name=".activity.NonameArticleListActivity"
         android:theme="@style/SwipeBackTheme" />
     <activity
-        android:name="io.xfdingustc.mdngaclient.ui.activities.FlexibleTopicListActivity"
+        android:name="io.xfdingustc.mdngaclient.ui.activities.TopicListActivity"
         android:exported="true"
         android:theme="@style/SwipeBackTheme">
       <intent-filter>
