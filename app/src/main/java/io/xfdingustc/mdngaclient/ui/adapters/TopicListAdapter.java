@@ -1,4 +1,4 @@
-package sp.phone.adapter;
+package io.xfdingustc.mdngaclient.ui.adapters;
 
 import android.content.Context;
 import android.content.res.Resources;

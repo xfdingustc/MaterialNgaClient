@@ -13,7 +13,7 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 
 import gov.anzong.androidnga.Utils;
-import sp.phone.adapter.AppendableTopicAdapter;
+import io.xfdingustc.mdngaclient.ui.adapters.AppendableTopicAdapter;
 import sp.phone.forumoperation.HttpPostClient;
 import sp.phone.utils.ActivityUtil;
 import sp.phone.utils.PhoneConfiguration;

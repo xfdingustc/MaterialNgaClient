@@ -9,7 +9,7 @@ import android.widget.HeaderViewListAdapter;
 import android.widget.ListView;
 
 import gov.anzong.androidnga.R;
-import sp.phone.adapter.TopicListAdapter;
+import io.xfdingustc.mdngaclient.ui.adapters.TopicListAdapter;
 import sp.phone.utils.PhoneConfiguration;
 import sp.phone.utils.StringUtil;
 

@@ -28,8 +28,7 @@ public class JsonTopicListLoadTask extends AsyncTask<String, Integer, TopicListI
 //	private String table;
 
 
-    public JsonTopicListLoadTask(Context context,
-                                 OnTopListLoadFinishedListener notifier) {
+    public JsonTopicListLoadTask(Context context, OnTopListLoadFinishedListener notifier) {
         super();
         this.context = context;
         this.notifier = notifier;
@@ -248,7 +247,7 @@ public class JsonTopicListLoadTask extends AsyncTask<String, Integer, TopicListI
                     entry.setAuthor(sb.toString());
                 }
                 if (PhoneConfiguration.getInstance().showStatic ||
-                        (StringUtil.isEmpty(entry.getTop_level()) && StringUtil.isEmpty(entry.getStatic_topic()))) {
+                    (StringUtil.isEmpty(entry.getTop_level()) && StringUtil.isEmpty(entry.getStatic_topic()))) {
                     if (PhoneConfiguration.getInstance().showLajibankuai) {
                         articleEntryList.add(entry);//显示的话，不用管直接加
                     } else {
@@ -262,7 +261,7 @@ public class JsonTopicListLoadTask extends AsyncTask<String, Integer, TopicListI
                 }
             } catch (Exception e) {
                 /*ThreadPageInfo entry = new ThreadPageInfo();
-				String error = rowObj.getString("error");
+                String error = rowObj.getString("error");
 				entry.setSubject(error);
 				entry.setAuthor("");
 				entry.setLastposter("");
@@ -295,7 +294,7 @@ public class JsonTopicListLoadTask extends AsyncTask<String, Integer, TopicListI
         ActivityUtil.getInstance().dismiss();
         if (result == null) {
             ActivityUtil.getInstance().noticeError
-                    (error, context);
+                (error, context);
             return;
         }
         if (null != notifier)

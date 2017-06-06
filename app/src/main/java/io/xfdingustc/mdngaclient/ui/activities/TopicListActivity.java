@@ -1,32 +1,22 @@
 package io.xfdingustc.mdngaclient.ui.activities;
 
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.nfc.NdefMessage;
-import android.nfc.NdefRecord;
-import android.nfc.NfcAdapter;
-import android.nfc.NfcAdapter.CreateNdefMessageCallback;
-import android.nfc.NfcEvent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
-import android.support.v7.app.ActionBar.OnNavigationListener;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ArrayAdapter;
-import android.widget.FrameLayout;
 import android.widget.HeaderViewListAdapter;
-import android.widget.ListView;
 import android.widget.Toast;
 
 import java.io.UnsupportedEncodingException;
@@ -36,17 +26,14 @@ import butterknife.BindView;
 import butterknife.OnClick;
 import gov.anzong.androidnga.R;
 import gov.anzong.androidnga.activity.SwipeBackAppCompatActivity;
-import sp.phone.adapter.AppendableTopicAdapter;
-import sp.phone.adapter.TopicListAdapter;
+import io.xfdingustc.mdngaclient.ui.adapters.AppendableTopicAdapter;
+import io.xfdingustc.mdngaclient.ui.adapters.TopicListRvAdapter;
 import sp.phone.bean.BoardHolder;
 import sp.phone.bean.ThreadData;
 import sp.phone.bean.ThreadPageInfo;
 import sp.phone.bean.TopicListInfo;
-import sp.phone.fragment.ArticleContainerFragment;
-import sp.phone.fragment.TopicListContainer;
 import sp.phone.interfaces.EnterJsonArticle;
 import sp.phone.interfaces.NextJsonTopicListLoader;
-import sp.phone.interfaces.OnChildFragmentRemovedListener;
 import sp.phone.interfaces.OnThreadPageLoadFinishedListener;
 import sp.phone.interfaces.OnTopListLoadFinishedListener;
 import sp.phone.interfaces.PagerOwnner;
@@ -57,19 +44,17 @@ import sp.phone.task.JsonTopicListLoadTask;
 import sp.phone.utils.ActivityUtil;
 import sp.phone.utils.HttpUtil;
 import sp.phone.utils.PhoneConfiguration;
-import sp.phone.utils.ReflectionUtil;
 import sp.phone.utils.StringUtil;
-import sp.phone.utils.ThemeManager;
 import uk.co.senab.actionbarpulltorefresh.extras.actionbarcompat.PullToRefreshAttacher;
 
 /**
  * 帖子列表
  */
-public class TopicListActivity extends SwipeBackAppCompatActivity implements OnTopListLoadFinishedListener, OnItemClickListener,
+public class TopicListActivity extends SwipeBackAppCompatActivity implements OnItemClickListener,
     OnThreadPageLoadFinishedListener, PagerOwnner, PullToRefreshAttacherOnwer, OnItemLongClickListener, NextJsonTopicListLoader {
     private String TAG = TopicListActivity.class.getSimpleName();
     int fid;
-    private AppendableTopicAdapter adapter;
+    private TopicListRvAdapter adapter;
     String strs[] = {"全部", "精华", "推荐"};
     ArrayAdapter<String> categoryAdapter;
     int flags = 7;
@@ -94,7 +79,7 @@ public class TopicListActivity extends SwipeBackAppCompatActivity implements OnT
     int category = 0;
 
     @BindView(R.id.topic_list)
-    ListView listView;
+    RecyclerView listView;
 
     @BindView(R.id.fab)
     FloatingActionButton mFab;
@@ -180,14 +165,9 @@ public class TopicListActivity extends SwipeBackAppCompatActivity implements OnT
     }
 
     private void initViews() {
-        adapter = new AppendableTopicAdapter(this, null, this);
+        listView.setLayoutManager(new LinearLayoutManager(this));
+        adapter = new TopicListRvAdapter(this, this);
         listView.setAdapter(adapter);
-        try {
-            OnItemClickListener listener = (OnItemClickListener) this;
-            listView.setOnItemClickListener(listener);
-        } catch (ClassCastException e) {
-            Log.e(TAG, "father activity should implenent OnItemClickListener");
-        }
 
         refresh();
 
@@ -199,7 +179,12 @@ public class TopicListActivity extends SwipeBackAppCompatActivity implements OnT
     }
 
     private void refresh() {
-        JsonTopicListLoadTask task = new JsonTopicListLoadTask(this, this);
+        JsonTopicListLoadTask task = new JsonTopicListLoadTask(this, new OnTopListLoadFinishedListener() {
+            @Override
+            public void jsonfinishLoad(TopicListInfo result) {
+                onPageLoadFinished(result);
+            }
+        });
         task.execute(getUrl(1, true, true));
     }
 
@@ -281,8 +266,8 @@ public class TopicListActivity extends SwipeBackAppCompatActivity implements OnT
         super.onResume();
     }
 
-    @Override
-    public void jsonfinishLoad(TopicListInfo result) {
+
+    private void onPageLoadFinished(TopicListInfo result) {
         if (result == null)
             return;
 
@@ -306,9 +291,8 @@ public class TopicListActivity extends SwipeBackAppCompatActivity implements OnT
                 pageCount++;
         }
 
-        adapter.clear();
         adapter.jsonfinishLoad(result);
-        listView.setAdapter(adapter);
+//        listView.setAdapter(adapter);
 
     }
 
